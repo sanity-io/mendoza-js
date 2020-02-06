@@ -45,8 +45,8 @@ export class Patcher<V, S, O, A> {
     this.outputStack.push({value: null, key})
   }
 
-  pushValue(value: V) {
-    this.outputStack.push({value})
+  pushNop(value: V) {
+    this.inputStack.push({value})
   }
 
   outputEntry(): OutputEntry<V, S, O, A> {
@@ -98,12 +98,31 @@ export class Patcher<V, S, O, A> {
         case 0: {
           // EnterValue
           let value = this.model.wrap(patch[i++])
-          this.pushValue(value)
+          this.outputStack.push({value})
+          break
+        }
+        case 1: {
+          // EnterRootNop
+          this.pushNop(this.root)
           break
         }
         case 2: {
           // EnterRootCopy
           this.pushCopy(this.root)
+          break
+        }
+        case 3: {
+          // EnterRootBlank
+          this.pushBlank(this.root)
+          break
+        }
+        case 4: {
+          // EnterFieldNop
+          let idx = patch[i++]
+          let entry = this.inputEntry()
+          let key = this.inputKey(entry, idx)
+          let value = this.model.objectGetField(entry.value, key)
+          this.pushNop(value)
           break
         }
         case 5: {
@@ -122,6 +141,14 @@ export class Patcher<V, S, O, A> {
           let key = this.inputKey(entry, idx)
           let value = this.model.objectGetField(entry.value, key)
           this.pushBlank(value, key)
+          break
+        }
+        case 7: {
+          // EnterElementNop
+          let idx = patch[i++]
+          let entry = this.inputEntry()
+          let value = this.model.arrayGetElement(entry.value, idx)
+          this.pushNop(value)
           break
         }
         case 8: {
