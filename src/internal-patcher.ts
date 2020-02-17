@@ -1,26 +1,76 @@
 import {ObjectModel} from './object-model'
 import {RawPatch} from './patch'
 
+const OPS = [
+  'Value',
+  'Copy',
+  'Blank',
+  'ReturnIntoArray',
+  'ReturnIntoObject',
+  'ReturnIntoObjectSameKey',
+  'PushField',
+  'PushElement',
+  'PushParent',
+  'Pop',
+  'PushFieldCopy',
+  'PushFieldBlank',
+  'PushElementCopy',
+  'PushElementBlank',
+  'ReturnIntoObjectPop',
+  'ReturnIntoObjectSameKeyPop',
+  'ReturnIntoArrayPop',
+  'ObjectSetFieldValue',
+  'ObjectCopyField',
+  'ObjectDeleteField',
+  'ArrayAppendValue',
+  'ArrayAppendSlice',
+  'StringAppendString',
+  'StringAppendSlice'
+]
+
 type InputEntry<V> = {
   value: V
+  key?: string
   keys?: string[]
 }
 
 type OutputEntry<V, S, O, A> = {
   value: V | null
   writeValue?: S | O | A
-  key?: string
 }
 
 export class Patcher<V, S, O, A> {
   private model: ObjectModel<V, S, O, A>
   private root: V
+  private patch: RawPatch
+  private i = 0
   private inputStack: InputEntry<V>[] = []
   private outputStack: OutputEntry<V, S, O, A>[] = []
 
-  constructor(model: ObjectModel<V, S, O, A>, root: V) {
+  constructor(model: ObjectModel<V, S, O, A>, root: V, patch: RawPatch) {
     this.model = model
     this.root = root
+    this.patch = patch
+  }
+
+  read(): unknown {
+    return this.patch[this.i++]
+  }
+
+  process() {
+    this.inputStack.push({value: this.root})
+    this.outputStack.push({value: this.root})
+
+    for (; this.i < this.patch.length; ) {
+      let opcode = this.read() as number
+      let op = OPS[opcode]
+      if (!op) throw new Error(`Unknown opcode: ${opcode}`)
+      let processor = `process${op}`
+      ;(this as any)[processor].apply(this)
+    }
+
+    let entry = this.outputStack.pop()!
+    return this.finalizeOutput(entry)
   }
 
   inputEntry(): InputEntry<V> {
@@ -33,20 +83,6 @@ export class Patcher<V, S, O, A> {
     }
 
     return entry.keys[idx]
-  }
-
-  pushCopy(value: V, key?: string) {
-    this.inputStack.push({value})
-    this.outputStack.push({value, key})
-  }
-
-  pushBlank(value: V, key?: string) {
-    this.inputStack.push({value})
-    this.outputStack.push({value: null, key})
-  }
-
-  pushNop(value: V) {
-    this.inputStack.push({value})
   }
 
   outputEntry(): OutputEntry<V, S, O, A> {
@@ -91,175 +127,144 @@ export class Patcher<V, S, O, A> {
     }
   }
 
-  process(patch: RawPatch): V {
-    for (let i = 0; i < patch.length; ) {
-      let op = patch[i++]
-      switch (op) {
-        case 0: {
-          // EnterValue
-          let value = this.model.wrap(patch[i++])
-          this.outputStack.push({value})
-          break
-        }
-        case 1: {
-          // EnterRootNop
-          this.pushNop(this.root)
-          break
-        }
-        case 2: {
-          // EnterRootCopy
-          this.pushCopy(this.root)
-          break
-        }
-        case 3: {
-          // EnterRootBlank
-          this.pushBlank(this.root)
-          break
-        }
-        case 4: {
-          // EnterFieldNop
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let key = this.inputKey(entry, idx)
-          let value = this.model.objectGetField(entry.value, key)
-          this.pushNop(value)
-          break
-        }
-        case 5: {
-          // EnterFieldCopy
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let key = this.inputKey(entry, idx)
-          let value = this.model.objectGetField(entry.value, key)
-          this.pushCopy(value, key)
-          break
-        }
-        case 6: {
-          // EnterFieldBlank
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let key = this.inputKey(entry, idx)
-          let value = this.model.objectGetField(entry.value, key)
-          this.pushBlank(value, key)
-          break
-        }
-        case 7: {
-          // EnterElementNop
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let value = this.model.arrayGetElement(entry.value, idx)
-          this.pushNop(value)
-          break
-        }
-        case 8: {
-          // EnterElementCopy
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let value = this.model.arrayGetElement(entry.value, idx)
-          this.pushCopy(value)
-          break
-        }
-        case 9: {
-          // EnterElementCopy
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let value = this.model.arrayGetElement(entry.value, idx)
-          this.pushBlank(value)
-          break
-        }
-        case 10: {
-          // ReturnIntoArray
-          this.inputStack.pop()
-          let entry = this.outputStack.pop()!
-          let result = this.finalizeOutput(entry)
-          let arr = this.outputArray()
-          this.model.arrayAppendValue(arr, result)
-          break
-        }
-        case 11: {
-          // ReturnIntoObject
-          let key = patch[i++]
-          this.inputStack.pop()
-          let entry = this.outputStack.pop()!
-          let result = this.finalizeOutput(entry)
-          let obj = this.outputObject()
-          this.model.objectSetField(obj, key, result)
-          break
-        }
-        case 12: {
-          // ReturnIntoObjectKeyless
-          this.inputStack.pop()
-          let entry = this.outputStack.pop()!
-          let result = this.finalizeOutput(entry)
-          let obj = this.outputObject()
-          this.model.objectSetField(obj, entry.key!, result)
-          break
-        }
-        case 13: {
-          // ObjectSetFieldValue
-          let key = patch[i++]
-          let value = this.model.wrap(patch[i++])
-          let obj = this.outputObject()
-          this.model.objectSetField(obj, key, value)
-          break
-        }
-        case 14: {
-          // ObjectCopyField
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let key = this.inputKey(entry, idx)
-          let obj = this.outputObject()
-          let value = this.model.objectGetField(entry.value, key)
-          this.model.objectSetField(obj, key, value)
-          break
-        }
-        case 15: {
-          // ObjectDeleteField
-          let idx = patch[i++]
-          let entry = this.inputEntry()
-          let key = this.inputKey(entry, idx)
-          let obj = this.outputObject()
-          this.model.objectDeleteField(obj, key)
-          break
-        }
-        case 16: {
-          // ArrayAppendValue
-          let value = this.model.wrap(patch[i++])
-          let arr = this.outputArray()
-          this.model.arrayAppendValue(arr, value)
-          break
-        }
-        case 17: {
-          // ArrayAppendSlice
-          let left = patch[i++]
-          let right = patch[i++]
-          let str = this.outputArray()
-          let val = this.inputEntry().value
-          this.model.arrayAppendSlice(str, val, left, right)
-          break
-        }
-        case 18: {
-          // StringAppendString
-          let value = this.model.wrap(patch[i++])
-          let str = this.outputString()
-          this.model.stringAppendValue(str, value)
-          break
-        }
-        case 19: {
-          // StringAppendSlice
-          let left = patch[i++]
-          let right = patch[i++]
-          let str = this.outputString()
-          let val = this.inputEntry().value
-          this.model.stringAppendSlice(str, val, left, right)
-          break
-        }
-        default:
-          throw new Error('unknown op ' + op)
-      }
-    }
+  // Processors:
 
+  processValue() {
+    let value = this.model.wrap(this.read())
+    this.outputStack.push({value})
+  }
+
+  processCopy() {
+    let input = this.inputEntry()
+    this.outputStack.push({value: input.value})
+  }
+
+  processBlank() {
+    this.outputStack.push({value: null})
+  }
+
+  processReturnIntoArray() {
     let entry = this.outputStack.pop()!
-    return this.finalizeOutput(entry)
+    let result = this.finalizeOutput(entry)
+    let arr = this.outputArray()
+    this.model.arrayAppendValue(arr, result)
+  }
+
+  processReturnIntoObject() {
+    let key = this.read() as string
+    let entry = this.outputStack.pop()!
+    let result = this.finalizeOutput(entry)
+    let obj = this.outputObject()
+    this.model.objectSetField(obj, key, result)
+  }
+
+  processReturnIntoObjectSameKey() {
+    let input = this.inputEntry()
+    let entry = this.outputStack.pop()!
+    let result = this.finalizeOutput(entry)
+    let obj = this.outputObject()
+    this.model.objectSetField(obj, input.key!, result)
+  }
+
+  processPushField() {
+    let idx = this.read() as number
+    let entry = this.inputEntry()
+    let key = this.inputKey(entry, idx)
+    let value = this.model.objectGetField(entry.value, key)
+    this.inputStack.push({value, key})
+  }
+
+  processPushElement() {
+    let idx = this.read() as number
+    let entry = this.inputEntry()
+    let value = this.model.arrayGetElement(entry.value, idx)
+    this.inputStack.push({value})
+  }
+
+  processPop() {
+    this.inputStack.pop()
+  }
+
+  processPushFieldCopy() {
+    this.processPushField()
+    this.processCopy()
+  }
+
+  processPushFieldBlank() {
+    this.processPushField()
+    this.processBlank()
+  }
+
+  processPushElementCopy() {
+    this.processPushElement()
+    this.processCopy()
+  }
+
+  processPushElementBlank() {
+    this.processPushElement()
+    this.processBlank()
+  }
+
+  processReturnIntoObjectPop() {
+    this.processReturnIntoObject()
+    this.processPop()
+  }
+
+  processReturnIntoObjectSameKeyPop() {
+    this.processReturnIntoObjectSameKey()
+    this.processPop()
+  }
+
+  processReturnIntoArrayPop() {
+    this.processReturnIntoArray()
+    this.processPop()
+  }
+
+  processObjectSetFieldValue() {
+    this.processValue()
+    this.processReturnIntoObject()
+  }
+
+  processObjectCopyField() {
+    this.processPushField()
+    this.processCopy()
+    this.processReturnIntoObjectSameKey()
+    this.processPop()
+  }
+
+  processObjectDeleteField() {
+    let idx = this.read() as number
+    let entry = this.inputEntry()
+    let key = this.inputKey(entry, idx)
+    let obj = this.outputObject()
+    this.model.objectDeleteField(obj, key)
+  }
+
+  processArrayAppendValue() {
+    let value = this.model.wrap(this.read())
+    let arr = this.outputArray()
+    this.model.arrayAppendValue(arr, value)
+  }
+
+  processArrayAppendSlice() {
+    let left = this.read() as number
+    let right = this.read() as number
+    let str = this.outputArray()
+    let val = this.inputEntry().value
+    this.model.arrayAppendSlice(str, val, left, right)
+  }
+
+  processStringAppendString() {
+    let value = this.model.wrap(this.read())
+    let str = this.outputString()
+    this.model.stringAppendValue(str, value)
+  }
+
+  processStringAppendSlice() {
+    let left = this.read() as number
+    let right = this.read() as number
+    let str = this.outputString()
+    let val = this.inputEntry().value
+    this.model.stringAppendSlice(str, val, left, right)
   }
 }

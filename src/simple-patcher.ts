@@ -84,6 +84,6 @@ const Model: ObjectModel<unknown, StringBuilder, ObjectBuilder, ArrayBuilder> = 
 // Applies a patch on a JavaScript object.
 export function applyPatch(left: any, patch: RawPatch): any {
   let root = left // No need to wrap because the representation is the same.
-  let patcher = new Patcher(Model, root)
-  return patcher.process(patch)
+  let patcher = new Patcher(Model, root, patch)
+  return patcher.process()
 }

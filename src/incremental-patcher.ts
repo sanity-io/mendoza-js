@@ -377,6 +377,6 @@ export function rebaseValue(left: Value, right: Value): Value {
 
 export function applyPatch(left: Value, patch: RawPatch, origin: Origin) {
   let model = new Model(origin)
-  let patcher = new Patcher(model, left)
-  return patcher.process(patch)
+  let patcher = new Patcher(model, left, patch)
+  return patcher.process()
 }
