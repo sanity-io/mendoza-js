@@ -1,10 +1,37 @@
 {
-  "name": "mendoza-js",
+  "name": "mendoza",
+  "version": "2.0.1",
+  "description": "Mendoza, differ for structured documents",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "type-check": "tsc --noEmit"
+  },
   "devDependencies": {
     "prettier": "^1.19.1",
     "ts-node": "^8.6.2",
+    "tslib": "^2.0.3",
     "typescript": "^3.7.5"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanity-io/mendoza-js.git"
+  },
+  "keywords": [
+    "mendoza",
+    "diff"
+  ],
+  "author": "Sanity.io <hello@sanity.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sanity-io/mendoza-js/issues"
+  },
+  "homepage": "https://www.sanity.io/",
   "prettier": {
     "semi": false,
     "printWidth": 100,
