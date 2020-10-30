@@ -1,6 +1,7 @@
 import {ObjectModel} from './object-model'
 import {Patcher} from './internal-patcher'
 import {RawPatch} from './patch'
+import {utf8resolveIndex} from './utf8'
 
 type StringBuilder = {type: 'string'; data: string}
 type ObjectBuilder = {type: 'object'; data: {[key: string]: unknown}}
@@ -17,6 +18,10 @@ const Model: ObjectModel<unknown, StringBuilder, ObjectBuilder, ArrayBuilder> = 
     } else {
       return b.data
     }
+  },
+
+  markChanged(value) {
+    return value
   },
 
   objectGetKeys(value: unknown): string[] {
@@ -73,7 +78,12 @@ const Model: ObjectModel<unknown, StringBuilder, ObjectBuilder, ArrayBuilder> = 
   },
 
   stringAppendSlice(target: StringBuilder, source: unknown, left: number, right: number): void {
-    target.data += (source as string).slice(left, right)
+    const sourceString = source as string
+
+    const leftPos = utf8resolveIndex(sourceString, left)
+    const rightPos = utf8resolveIndex(sourceString, right, leftPos)
+
+    target.data += sourceString.slice(leftPos, rightPos)
   },
 
   stringAppendValue(target: StringBuilder, value: unknown): void {
