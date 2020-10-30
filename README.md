@@ -3,7 +3,7 @@
 Basic example:
 
 ```typescript
-import {applyPatch} from "mendoza-js"
+import {applyPatch} from "mendoza"
 
 let left = {…};
 let patch = […];
@@ -13,7 +13,9 @@ let right = applyPatch(left, patch);
 Incremental patcher:
 
 ```typescript
-import {Value, rebaseValue, wrap, unwrap, getType, applyPatch} from "mendoza-js/src/incremental-patcher"
+import {incremental} from "mendoza"
+
+const {Value, rebaseValue, wrap, unwrap, getType, applyPatch} = incremental
 
 // Create an empty initial version:
 const ROOT = wrap(null, null);
