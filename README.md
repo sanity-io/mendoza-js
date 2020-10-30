@@ -1,4 +1,18 @@
-# Mendoza decoder in TypeScript
+# mendoza-js
+
+[![npm version](https://img.shields.io/npm/v/mendoza.svg?style=flat-square)](https://www.npmjs.com/package/mendoza)[![Build Status](https://img.shields.io/travis/sanity-io/mendoza-js/main.svg?style=flat-square)](https://travis-ci.org/sanity-io/mendoza-js)[![npm bundle size](https://img.shields.io/bundlephobia/minzip/mendoza?style=flat-square)](https://bundlephobia.com/result?p=mendoza)
+
+[Mendoza](https://github.com/sanity-io/mendoza) decoder in TypeScript.
+
+## Installation
+
+```sh
+$ npm install mendoza
+// or
+$ yarn add mendoza
+```
+
+## Usage
 
 Basic example:
 
@@ -55,3 +69,7 @@ for (let patch of patches) {
 // Return the final full object:
 console.log(unwrap(value));
 ```
+
+## License
+
+MIT © [Sanity.io](https://www.sanity.io/)
