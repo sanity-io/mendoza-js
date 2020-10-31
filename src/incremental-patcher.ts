@@ -1,6 +1,6 @@
 import {ObjectModel} from './object-model'
 import {RawPatch} from './patch'
-import {Patcher} from './internal-patcher'
+import {applyPatchToModel} from './internal-patcher'
 import {utf8charSize, utf8stringSize, commonPrefix, commonSuffix} from './utf8'
 
 // The incremental patcher allows you to apply multiple patches and tracks the history of every element.
@@ -440,7 +440,6 @@ export function rebaseValue<T>(left: Value<T>, right: Value<T>): Value<T> {
 }
 
 export function applyPatch<T>(left: Value<T>, patch: RawPatch, startMeta: T) {
-  let model = new Model(startMeta)
-  let patcher = new Patcher(model, left, patch)
-  return patcher.process()
+  const model = new Model(startMeta)
+  return applyPatchToModel(model, left, patch)
 }

@@ -1,5 +1,5 @@
 import {ObjectModel} from './object-model'
-import {Patcher} from './internal-patcher'
+import {applyPatchToModel} from './internal-patcher'
 import {RawPatch} from './patch'
 import {utf8resolveIndex} from './utf8'
 
@@ -93,7 +93,6 @@ const Model: ObjectModel<unknown, StringBuilder, ObjectBuilder, ArrayBuilder> = 
 
 // Applies a patch on a JavaScript object.
 export function applyPatch(left: any, patch: RawPatch): any {
-  let root = left // No need to wrap because the representation is the same.
-  let patcher = new Patcher(Model, root, patch)
-  return patcher.process()
+  const root = left // No need to wrap because the representation is the same.
+  return applyPatchToModel(Model, root, patch)
 }
