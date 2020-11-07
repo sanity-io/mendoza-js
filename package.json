@@ -12,7 +12,7 @@
   "scripts": {
     "prebuild": "npm run clean",
     "build": "npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc --module esnext --outDir lib/esm",
+    "build:esm": "tsc --module es6 --outDir lib/esm",
     "build:cjs": "tsc --module commonjs --outDir lib/cjs",
     "prepublishOnly": "npm run build",
     "clean": "rimraf lib",
