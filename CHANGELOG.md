@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.1](https://github.com/sanity-io/mendoza-js/compare/v3.0.0...v3.0.1) (2023-08-04)
+
+### Bug Fixes
+
+- solve issue affecting Next.js and swcMinify in production ([7b4c271](https://github.com/sanity-io/mendoza-js/commit/7b4c2716dc4025b61738d6bdf5a12183b5cb360f))
+
 ## [3.0.0](https://github.com/sanity-io/mendoza-js/compare/v2.1.2...v3.0.0) (2023-08-04)
 
 ### ⚠ BREAKING CHANGES
