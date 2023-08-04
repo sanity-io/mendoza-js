@@ -1,6 +1,9 @@
 # mendoza-js
 
-[![npm version](https://img.shields.io/npm/v/mendoza.svg?style=flat-square)](https://www.npmjs.com/package/mendoza)[![Build Status](https://img.shields.io/travis/sanity-io/mendoza-js/main.svg?style=flat-square)](https://travis-ci.org/sanity-io/mendoza-js)[![npm bundle size](https://img.shields.io/bundlephobia/minzip/mendoza?style=flat-square)](https://bundlephobia.com/result?p=mendoza)
+[![npm stat](https://img.shields.io/npm/dm/mendoza.svg?style=flat-square)](https://npm-stat.com/charts.html?package=mendoza)
+[![npm version](https://img.shields.io/npm/v/mendoza.svg?style=flat-square)](https://www.npmjs.com/package/mendoza)
+[![gzip size][gzip-badge]][bundlephobia]
+[![size][size-badge]][bundlephobia]
 
 [Mendoza](https://github.com/sanity-io/mendoza) decoder in TypeScript.
 
@@ -73,3 +76,16 @@ console.log(unwrap(value));
 ## License
 
 MIT © [Sanity.io](https://www.sanity.io/)
+
+
+## Release new version
+
+Run the ["CI & Release" workflow](https://github.com/sanity-io/mendoza-js/actions).
+Make sure to select the main branch and check "Release new version".
+
+Semantic release will only release on configured branches, so it is safe to run release on any branch.
+
+
+[gzip-badge]: https://img.shields.io/bundlephobia/minzip/mendoza?label=gzip%20size&style=flat-square
+[size-badge]: https://img.shields.io/bundlephobia/min/mendoza?label=size&style=flat-square
+[bundlephobia]: https://bundlephobia.com/package/mendoza
