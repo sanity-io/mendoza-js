@@ -77,14 +77,12 @@ console.log(unwrap(value));
 
 MIT © [Sanity.io](https://www.sanity.io/)
 
-
 ## Release new version
 
 Run the ["CI & Release" workflow](https://github.com/sanity-io/mendoza-js/actions).
 Make sure to select the main branch and check "Release new version".
 
 Semantic release will only release on configured branches, so it is safe to run release on any branch.
-
 
 [gzip-badge]: https://img.shields.io/bundlephobia/minzip/mendoza?label=gzip%20size&style=flat-square
 [size-badge]: https://img.shields.io/bundlephobia/min/mendoza?label=size&style=flat-square
