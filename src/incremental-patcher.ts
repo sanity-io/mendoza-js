@@ -1,7 +1,7 @@
+import {Patcher} from './internal-patcher'
 import {ObjectModel} from './object-model'
 import {RawPatch} from './patch'
-import {Patcher} from './internal-patcher'
-import {utf8charSize, utf8stringSize, commonPrefix, commonSuffix} from './utf8'
+import {commonPrefix, commonSuffix, utf8charSize, utf8stringSize} from './utf8'
 
 // The incremental patcher allows you to apply multiple patches and tracks the history of every element.
 // It also allows you to extract a simple diff between the documents.

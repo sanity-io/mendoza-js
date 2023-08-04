@@ -39,7 +39,7 @@
     "build": "npm run clean && pkg build --strict && pkg --strict",
     "clean": "npx rimraf dist coverage",
     "coverage": "vitest run --coverage",
-    "lint": "echo todo",
+    "lint": "eslint . --ext .cjs,.js,.ts --report-unused-disable-directives",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "type-check": "tsc --noEmit"

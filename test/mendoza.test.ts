@@ -1,5 +1,5 @@
-import {test, expect} from 'vitest'
 import {applyPatch} from 'mendoza'
+import {expect, test} from 'vitest'
 
 test('patches correctly', () => {
   const left = {name: 'Bob Bobson', age: 30, skills: ['Go', 'Patching', 'Playing']}
