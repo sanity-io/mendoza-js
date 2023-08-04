@@ -299,9 +299,9 @@ class Model<T>
 
     for (let use of part.uses) {
       // Insert the new part.
-      let idx = use.parts.indexOf(part)
-      if (idx === -1) throw new Error('bug: mismatch between string parts and use.')
-      use.parts.splice(idx + 1, 0, newPart)
+      let ndx = use.parts.indexOf(part)
+      if (ndx === -1) throw new Error('bug: mismatch between string parts and use.')
+      use.parts.splice(ndx + 1, 0, newPart)
     }
   }
 
