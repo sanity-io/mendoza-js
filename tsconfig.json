@@ -1,13 +1,11 @@
 {
   "extends": "./tsconfig.settings",
-  "include": ["./src", "./modules.d.ts", "./test"],
-  "exclude": ["./test-deno/test.ts"],
+  "include": ["./src", "./test"],
   "compilerOptions": {
     "noEmit": true,
     "module": "esnext",
     "paths": {
-      "get-it": ["./src"],
-      "get-it/middleware": ["./src/middleware"]
+      "mendoza": ["./src"]
     }
   }
 }

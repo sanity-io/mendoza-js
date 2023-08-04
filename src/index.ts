@@ -1,3 +1,4 @@
-export * as incremental from './incremental-patcher'
-export {RawPatch, RawOperation} from './patch'
+import * as incremental from './incremental-patcher'
+export { incremental }
 export {applyPatch} from './simple-patcher'
+export type * from './patch'
