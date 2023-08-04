@@ -5,6 +5,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.3](https://github.com/sanity-io/mendoza-js/compare/v3.0.2...v3.0.3) (2023-08-04)
+
+### Bug Fixes
+
+- don't use TS private class fields ([7ca1455](https://github.com/sanity-io/mendoza-js/commit/7ca145567e9ccdb73522072bea5197257b5ceb11))
+- Next.js build issue with the `SimpleModel` instance ([393f721](https://github.com/sanity-io/mendoza-js/commit/393f7218d1fb77188d253e62e4ccedde681815ca))
+
 ## [3.0.2](https://github.com/sanity-io/mendoza-js/compare/v3.0.1...v3.0.2) (2023-08-04)
 
 ### Bug Fixes
