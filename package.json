@@ -14,16 +14,16 @@
     "src"
   ],
   "scripts": {
+    "clean": "npx rimraf dist coverage",
     "prebuild": "npm run clean",
     "build": "npm run build:esm && npm run build:cjs",
     "build:esm": "tsc --module es6 --outDir lib/esm",
     "lint": "echo todo",
-    "coverage": "npm test",
+    "coverage": "vitest run --coverage",
     "build:cjs": "tsc --module commonjs --outDir lib/cjs",
     "prepublishOnly": "npm run build",
-    "clean": "rimraf lib",
     "type-check": "tsc --noEmit",
-    "test": "jest --coverage"
+    "test": "vitest"
   },
   "devDependencies": {
     "@sanity/pkg-utils": "^2.3.10",
