@@ -40,17 +40,20 @@ type OutputEntry<V, S, O, A> = {
 }
 
 export class Patcher<V, S, O, A> {
-  private model: ObjectModel<V, S, O, A>
-  private root: V
-  private patch: RawPatch
-  private i = 0
-  private inputStack: InputEntry<V>[] = []
-  private outputStack: OutputEntry<V, S, O, A>[] = []
+  model: ObjectModel<V, S, O, A>
+  root: V
+  patch: RawPatch
+  i: number
+  inputStack: InputEntry<V>[]
+  outputStack: OutputEntry<V, S, O, A>[]
 
   constructor(model: ObjectModel<V, S, O, A>, root: V, patch: RawPatch) {
     this.model = model
     this.root = root
     this.patch = patch
+    this.i = 0
+    this.inputStack = []
+    this.outputStack = []
   }
 
   read(): unknown {
