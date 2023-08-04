@@ -73,7 +73,7 @@ class Model<T>
   asArray(value: Value<T>): ArrayContent<T> {
     if (!value.content) {
       let elements = (value.data as unknown[]).map((item) =>
-        this.wrapWithMeta(item, value.startMeta)
+        this.wrapWithMeta(item, value.startMeta),
       )
       let metas = elements.map(() => this.meta)
       value.content = {type: 'array', elements, metas}

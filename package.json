@@ -2,28 +2,54 @@
   "name": "mendoza",
   "version": "2.1.2",
   "description": "Mendoza, differ for structured documents",
+  "keywords": [
+    "mendoza",
+    "diff"
+  ],
+  "homepage": "https://www.sanity.io/",
+  "bugs": {
+    "url": "https://github.com/sanity-io/mendoza-js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanity-io/mendoza-js.git"
+  },
+  "license": "MIT",
+  "author": "Sanity.io <hello@sanity.io>",
+  "sideEffects": false,
+  "type": "module",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "types": "./lib/esm/index.d.ts",
-  "sideEffects": false,
-  "engines": {
     "node": ">=10"
-  },
   "files": [
     "lib",
     "src"
   ],
   "scripts": {
-    "clean": "npx rimraf dist coverage",
     "prebuild": "npm run clean",
     "build": "npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc --module es6 --outDir lib/esm",
-    "lint": "echo todo",
-    "coverage": "vitest run --coverage",
     "build:cjs": "tsc --module commonjs --outDir lib/cjs",
+    "build:esm": "tsc --module es6 --outDir lib/esm",
+    "clean": "npx rimraf dist coverage",
+    "coverage": "vitest run --coverage",
+    "lint": "echo todo",
     "prepublishOnly": "npm run build",
-    "type-check": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "browserslist": [
+    "> 0.2% and supports es6-module and supports es6-module-dynamic-import and not dead and not IE 11",
+    "maintained node versions"
+  ],
+  "prettier": {
+    "bracketSpacing": false,
+    "plugins": [
+      "prettier-plugin-packagejson"
+    ],
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true
   },
   "devDependencies": {
     "@sanity/pkg-utils": "^2.3.10",
@@ -45,25 +71,7 @@
     "vitest": "^0.34.1",
     "vitest-github-actions-reporter": "^0.10.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sanity-io/mendoza-js.git"
-  },
-  "keywords": [
-    "mendoza",
-    "diff"
-  ],
-  "author": "Sanity.io <hello@sanity.io>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/sanity-io/mendoza-js/issues"
-  },
-  "homepage": "https://www.sanity.io/",
-  "prettier": {
-    "semi": false,
-    "printWidth": 100,
-    "bracketSpacing": false,
-    "singleQuote": true
+  "engines": {
   },
   "publishConfig": {
     "access": "public",

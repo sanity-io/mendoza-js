@@ -1,27 +1,13 @@
 {
-  "include": ["src", "types"],
+  "extends": "./tsconfig.settings",
+  "include": ["./src", "./modules.d.ts", "./test"],
+  "exclude": ["./test-deno/test.ts"],
   "compilerOptions": {
-    "module": "ES6",
-    "lib": ["dom", "esnext"],
-    "target": "ES5",
-    "importHelpers": true,
-    "declaration": true,
-    "sourceMap": true,
-    "outDir": "./lib/esm",
-    "rootDir": "./src",
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "skipLibCheck": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true
+    "noEmit": true,
+    "module": "esnext",
+    "paths": {
+      "get-it": ["./src"],
+      "get-it/middleware": ["./src/middleware"]
+    }
   }
 }
