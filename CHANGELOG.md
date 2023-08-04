@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.2](https://github.com/sanity-io/mendoza-js/compare/v3.0.1...v3.0.2) (2023-08-04)
+
+### Bug Fixes
+
+- don't use TS private class fields ([65bba5a](https://github.com/sanity-io/mendoza-js/commit/65bba5ac3da5e771438c5f7d3228f726333b62dc))
+
 ## [3.0.1](https://github.com/sanity-io/mendoza-js/compare/v3.0.0...v3.0.1) (2023-08-04)
 
 ### Bug Fixes
