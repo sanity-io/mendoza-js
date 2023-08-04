@@ -38,7 +38,7 @@
   "scripts": {
     "build": "npm run clean && pkg build --strict && pkg --strict",
     "clean": "npx rimraf dist coverage",
-    "coverage": "vitest run --coverage",
+    "coverage": "npm test -- run --coverage",
     "lint": "eslint . --ext .cjs,.js,.ts --report-unused-disable-directives",
     "prepublishOnly": "npm run build",
     "test": "vitest",

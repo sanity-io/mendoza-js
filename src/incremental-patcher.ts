@@ -1,6 +1,6 @@
 import {Patcher} from './internal-patcher'
-import {ObjectModel} from './object-model'
-import {RawPatch} from './patch'
+import type {ObjectModel} from './object-model'
+import type {RawPatch} from './patch'
 import {commonPrefix, commonSuffix, utf8charSize, utf8stringSize} from './utf8'
 
 // The incremental patcher allows you to apply multiple patches and tracks the history of every element.
@@ -41,7 +41,7 @@ export type StringPart<T> = {
   endMeta: T
 }
 
-class Model<T>
+class IncrementalModel<T>
   implements ObjectModel<Value<T>, StringContent<T>, ObjectContent<T>, ArrayContent<T>>
 {
   private meta: T
@@ -362,8 +362,8 @@ export function rebaseValue<T>(left: Value<T>, right: Value<T>): Value<T> {
   let rightType = getType(right)
   if (leftType !== rightType) return right
 
-  let leftModel = new Model(left.endMeta)
-  let rightModel = new Model(right.endMeta)
+  let leftModel = new IncrementalModel(left.endMeta)
+  let rightModel = new IncrementalModel(right.endMeta)
 
   switch (leftType) {
     case 'object': {
@@ -443,7 +443,7 @@ export function rebaseValue<T>(left: Value<T>, right: Value<T>): Value<T> {
 }
 
 export function applyPatch<T>(left: Value<T>, patch: RawPatch, startMeta: T) {
-  let model = new Model(startMeta)
+  let model = new IncrementalModel(startMeta)
   let patcher = new Patcher(model, left, patch)
   return patcher.process()
 }
