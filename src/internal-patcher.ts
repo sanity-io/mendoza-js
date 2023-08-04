@@ -1,33 +1,6 @@
 import {ObjectModel} from './object-model'
 import {RawPatch} from './patch'
 
-const OPS = [
-  'Value',
-  'Copy',
-  'Blank',
-  'ReturnIntoArray',
-  'ReturnIntoObject',
-  'ReturnIntoObjectSameKey',
-  'PushField',
-  'PushElement',
-  'PushParent',
-  'Pop',
-  'PushFieldCopy',
-  'PushFieldBlank',
-  'PushElementCopy',
-  'PushElementBlank',
-  'ReturnIntoObjectPop',
-  'ReturnIntoObjectSameKeyPop',
-  'ReturnIntoArrayPop',
-  'ObjectSetFieldValue',
-  'ObjectCopyField',
-  'ObjectDeleteField',
-  'ArrayAppendValue',
-  'ArrayAppendSlice',
-  'StringAppendString',
-  'StringAppendSlice',
-]
-
 type InputEntry<V> = {
   value: V
   key?: string
@@ -46,6 +19,7 @@ export class Patcher<V, S, O, A> {
   i: number
   inputStack: InputEntry<V>[]
   outputStack: OutputEntry<V, S, O, A>[]
+  ops: ((this: Patcher<V, S, O, A>) => void)[]
 
   constructor(model: ObjectModel<V, S, O, A>, root: V, patch: RawPatch) {
     this.model = model
@@ -54,6 +28,32 @@ export class Patcher<V, S, O, A> {
     this.i = 0
     this.inputStack = []
     this.outputStack = []
+    this.ops = [
+      this.processValue,
+      this.processCopy,
+      this.processBlank,
+      this.processReturnIntoArray,
+      this.processReturnIntoObject,
+      this.processReturnIntoObjectSameKey,
+      this.processPushField,
+      this.processPushElement,
+      this.processPushParent,
+      this.processPop,
+      this.processPushFieldCopy,
+      this.processPushFieldBlank,
+      this.processPushElementCopy,
+      this.processPushElementBlank,
+      this.processReturnIntoObjectPop,
+      this.processReturnIntoObjectSameKeyPop,
+      this.processReturnIntoArrayPop,
+      this.processObjectSetFieldValue,
+      this.processObjectCopyField,
+      this.processObjectDeleteField,
+      this.processArrayAppendValue,
+      this.processArrayAppendSlice,
+      this.processStringAppendString,
+      this.processStringAppendSlice,
+    ]
   }
 
   read(): unknown {
@@ -66,10 +66,11 @@ export class Patcher<V, S, O, A> {
 
     for (; this.i < this.patch.length; ) {
       let opcode = this.read() as number
-      let op = OPS[opcode]
-      if (!op) throw new Error(`Unknown opcode: ${opcode}`)
-      let processor = `process${op}`
-      ;(this as any)[processor].apply(this)
+      let op = this.ops[opcode]
+      if (!op) {
+        throw new Error(`Unknown opcode: ${opcode}`)
+      }
+      op.apply(this)
     }
 
     let entry = this.outputStack.pop()!
@@ -176,6 +177,10 @@ export class Patcher<V, S, O, A> {
     let key = this.inputKey(entry, idx)
     let value = this.model.objectGetField(entry.value, key)
     this.inputStack.push({value, key})
+  }
+
+  processPushParent() {
+    throw new Error('not implemented')
   }
 
   processPushElement() {
