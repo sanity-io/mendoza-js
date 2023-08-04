@@ -21,7 +21,6 @@
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "types": "./lib/esm/index.d.ts",
-    "node": ">=10"
   "files": [
     "lib",
     "src"
@@ -72,6 +71,7 @@
     "vitest-github-actions-reporter": "^0.10.0"
   },
   "engines": {
+    "node": ">=14.18"
   },
   "publishConfig": {
     "access": "public",
