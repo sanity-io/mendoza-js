@@ -44,10 +44,7 @@
     "test": "vitest",
     "type-check": "tsc --noEmit"
   },
-  "browserslist": [
-    "> 0.2% and supports es6-module and supports es6-module-dynamic-import and not dead and not IE 11",
-    "maintained node versions"
-  ],
+  "browserslist": "extends @sanity/browserslist-config",
   "prettier": {
     "bracketSpacing": false,
     "plugins": [
@@ -58,7 +55,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@sanity/pkg-utils": "^2.4.8",
+    "@sanity/pkg-utils": "^4.1.0",
     "@sanity/semantic-release-preset": "^4.1.3",
     "@types/node": "^18.17.14",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
