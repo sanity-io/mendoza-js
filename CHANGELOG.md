@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.5](https://github.com/sanity-io/mendoza-js/compare/v3.0.4...v3.0.5) (2024-02-26)
+
+### Bug Fixes
+
+- **deps:** update dependency @sanity/pkg-utils to ^4.3.0 ([#32](https://github.com/sanity-io/mendoza-js/issues/32)) ([b10eb77](https://github.com/sanity-io/mendoza-js/commit/b10eb7770335e678f3621bc7ce2937421b9b2ac1))
+
 ## [3.0.4](https://github.com/sanity-io/mendoza-js/compare/v3.0.3...v3.0.4) (2024-01-25)
 
 ### Bug Fixes
