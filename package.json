@@ -55,7 +55,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@sanity/pkg-utils": "^4.3.0",
+    "@sanity/pkg-utils": "^5.0.0",
     "@sanity/semantic-release-preset": "^4.1.7",
     "@types/node": "^18.17.14",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
