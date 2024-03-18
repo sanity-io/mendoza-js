@@ -69,7 +69,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-packagejson": "^2.4.12",
     "rimraf": "^4.4.1",
-    "semantic-release": "^23.0.2",
+    "semantic-release": "^23.0.5",
     "typescript": "^5.4.2",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.3.1",
