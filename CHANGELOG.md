@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.7](https://github.com/sanity-io/mendoza-js/compare/v3.0.6...v3.0.7) (2024-04-11)
+
+### Bug Fixes
+
+- install snippets in README ([19d0c17](https://github.com/sanity-io/mendoza-js/commit/19d0c171ecb64dde168e812dfad89ec70b349f7f))
+
 ## [3.0.6](https://github.com/sanity-io/mendoza-js/compare/v3.0.5...v3.0.6) (2024-03-18)
 
 ### Bug Fixes
