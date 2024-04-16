@@ -12,11 +12,15 @@
 ```bash
 npm install mendoza
 ```
+
 or
+
 ```bash
 pnpm install mendoza
 ```
+
 or
+
 ```bash
 yarn add mendoza
 ```
