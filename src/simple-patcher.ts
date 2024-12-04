@@ -1,6 +1,6 @@
 import {Patcher} from './internal-patcher'
-import {ObjectModel} from './object-model'
-import {RawPatch} from './patch'
+import type {ObjectModel} from './object-model'
+import type {RawPatch} from './patch'
 import {utf8resolveIndex} from './utf8'
 
 type StringBuilder = {type: 'string'; data: string}

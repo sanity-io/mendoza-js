@@ -1,5 +1,5 @@
-import {ObjectModel} from './object-model'
-import {RawPatch} from './patch'
+import type {ObjectModel} from './object-model'
+import type {RawPatch} from './patch'
 
 const OPS = [
   'Value',

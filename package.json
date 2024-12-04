@@ -42,17 +42,10 @@
     "type-check": "tsc --noEmit"
   },
   "browserslist": "extends @sanity/browserslist-config",
-  "prettier": {
-    "bracketSpacing": false,
-    "plugins": [
-      "prettier-plugin-packagejson"
-    ],
-    "printWidth": 100,
-    "semi": false,
-    "singleQuote": true
-  },
+  "prettier": "@sanity/prettier-config",
   "devDependencies": {
-    "@sanity/pkg-utils": "^6.4.1",
+    "@sanity/pkg-utils": "^6.11.14",
+    "@sanity/prettier-config": "^1.0.3",
     "@sanity/semantic-release-preset": "^4.1.7",
     "@types/node": "^18.17.14",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
@@ -64,10 +57,9 @@
     "eslint-plugin-simple-import-sort": "^12.0.0",
     "ls-engines": "^0.9.1",
     "prettier": "^3.2.5",
-    "prettier-plugin-packagejson": "^2.4.14",
     "rimraf": "^4.4.1",
     "semantic-release": "^23.0.8",
-    "typescript": "^5.4.5",
+    "typescript": "5.7.2",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.4.0",
     "vitest-github-actions-reporter": "^0.11.1"

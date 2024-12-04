@@ -2,8 +2,6 @@
   "extends": "./tsconfig.settings",
   "include": ["./src", "./test"],
   "compilerOptions": {
-    "noEmit": true,
-    "module": "esnext",
     "paths": {
       "mendoza": ["./src"]
     }
