@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.8](https://github.com/sanity-io/mendoza-js/compare/v3.0.7...v3.0.8) (2024-12-04)
+
+### Bug Fixes
+
+- stricter typescript output ([8d27d5b](https://github.com/sanity-io/mendoza-js/commit/8d27d5baee0d79e09836424563c028764a4d2a49))
+
 ## [3.0.7](https://github.com/sanity-io/mendoza-js/compare/v3.0.6...v3.0.7) (2024-04-11)
 
 ### Bug Fixes
