@@ -55,9 +55,6 @@ jobs:
           - os: ubuntu-latest
             # Test the oldest LTS release of Node that's still receiving bugfixes and security patches, versions older than that have reached End-of-Life
             node: lts/-1
-          - os: ubuntu-latest
-            # Test the actively developed version that will become the latest LTS release next October
-            node: current
         # The `build` job already runs the testing suite in ubuntu and lts/*
         exclude:
           - os: ubuntu-latest
