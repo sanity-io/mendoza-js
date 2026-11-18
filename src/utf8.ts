@@ -39,7 +39,7 @@ export function utf8resolveIndex(str: string, idx: number) {
 export function commonPrefix(str: string, str2: string) {
   let len = Math.min(str.length, str2.length)
   let b = 0
-  for (let i = 0; i < len; ) {
+  for (let i = 0; i < len;) {
     let aPoint = str.codePointAt(i)!
     let bPoint = str2.codePointAt(i)!
     if (aPoint !== bPoint) return b
@@ -53,7 +53,7 @@ export function commonPrefix(str: string, str2: string) {
 export function commonSuffix(str: string, str2: string, prefix: number = 0) {
   let len = Math.min(str.length, str2.length) - prefix
   let b = 0
-  for (let i = 0; i < len; ) {
+  for (let i = 0; i < len;) {
     let aPoint = str.codePointAt(str.length - 1 - i)!
     let bPoint = str2.codePointAt(str2.length - 1 - i)!
     if (aPoint !== bPoint) return b

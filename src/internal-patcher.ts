@@ -64,7 +64,7 @@ export class Patcher<V, S, O, A> {
     this.inputStack.push({value: this.root})
     this.outputStack.push({value: this.root})
 
-    for (; this.i < this.patch.length; ) {
+    for (; this.i < this.patch.length;) {
       let opcode = this.read() as number
       let op = OPS[opcode]
       if (!op) throw new Error(`Unknown opcode: ${opcode}`)

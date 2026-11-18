@@ -1,4 +1,4 @@
-import {applyPatch} from 'mendoza'
+import {applyPatch} from '../src/index'
 import {expect, test} from 'vitest'
 
 test('patches correctly', () => {
