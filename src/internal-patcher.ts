@@ -185,6 +185,15 @@ export class Patcher<V, S, O, A> {
     this.inputStack.push({value})
   }
 
+  processPushParent() {
+    let n = this.read() as number
+    let idx = this.inputStack.length - 2 - n
+    if (idx < 0 || idx >= this.inputStack.length) {
+      throw new Error('PushParent: no such parent in the input stack')
+    }
+    this.inputStack.push(this.inputStack[idx])
+  }
+
   processPop() {
     this.inputStack.pop()
   }
