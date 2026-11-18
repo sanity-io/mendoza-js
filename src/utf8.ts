@@ -22,11 +22,11 @@ export function utf8stringSize(str: string): number {
 }
 
 /** Converts an UTF-8 byte index into a UCS-2 index. */
-export function utf8resolveIndex(str: string, idx: number, start = 0) {
-  let byteCount = start
+export function utf8resolveIndex(str: string, idx: number) {
+  let byteCount = 0
   let ucsIdx = 0
 
-  for (ucsIdx = start; byteCount < idx; ucsIdx++) {
+  for (ucsIdx = 0; byteCount < idx; ucsIdx++) {
     let code = str.codePointAt(ucsIdx)!
     let size = utf8charSize(code)
     if (size === 4) ucsIdx++ // Surrogate pair.
