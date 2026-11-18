@@ -81,7 +81,7 @@ class SimpleModel implements ObjectModel<unknown, StringBuilder, ObjectBuilder, 
     const sourceString = source as string
 
     const leftPos = utf8resolveIndex(sourceString, left)
-    const rightPos = utf8resolveIndex(sourceString, right, leftPos)
+    const rightPos = utf8resolveIndex(sourceString, right)
 
     target.data += sourceString.slice(leftPos, rightPos)
   }
