@@ -203,12 +203,51 @@ describe('incremental', () => {
         expect(unwrap(result)).toEqual([1, 2, 'x', 4])
       })
 
-      test('tracks element metas when slices keep their position', () => {
+      test('appending to a copied array keeps the positions of existing elements', () => {
         const v1 = wrap(['a', 'b', 'c'], 'v1')
         const v2 = applyPatch(v1, [Op.ArrayAppendValue, 'd'], 'v2')
         if (!v2.content || v2.content.type !== 'array') throw new Error('expected array')
         expect(v2.content.elements.map((e) => e.startMeta)).toEqual(['v1', 'v1', 'v1', 'v2'])
         expect(v2.content.elements.map((e) => e.endMeta)).toEqual(['v2', 'v2', 'v2', 'v2'])
+        expect(v2.content.metas).toEqual(['v1', 'v1', 'v1', 'v2'])
+      })
+
+      test('slices that keep their position keep their metas', () => {
+        const v1 = wrap(['a', 'b', 'c'], 'v1')
+        const v2 = applyPatch(
+          v1,
+          [Op.Blank, Op.ArrayAppendSlice, 0, 3, Op.ArrayAppendValue, 'd'],
+          'v2',
+        )
+        const v3 = applyPatch(
+          v2,
+          [Op.Blank, Op.ArrayAppendSlice, 0, 4, Op.ArrayAppendValue, 'e'],
+          'v3',
+        )
+        if (!v3.content || v3.content.type !== 'array') throw new Error('expected array')
+        expect(unwrap(v3)).toEqual(['a', 'b', 'c', 'd', 'e'])
+        expect(v3.content.metas).toEqual(['v1', 'v1', 'v1', 'v2', 'v3'])
+      })
+
+      test('slices that move get the current meta', () => {
+        const v1 = wrap(['a', 'b', 'c'], 'v1')
+        const v2 = applyPatch(
+          v1,
+          [
+            Op.Blank,
+            Op.ArrayAppendValue,
+            'x',
+            Op.ArrayAppendSlice,
+            0,
+            2,
+            Op.ArrayAppendSlice,
+            2,
+            3,
+          ],
+          'v2',
+        )
+        if (!v2.content || v2.content.type !== 'array') throw new Error('expected array')
+        expect(unwrap(v2)).toEqual(['x', 'a', 'b', 'c'])
         expect(v2.content.metas).toEqual(['v2', 'v2', 'v2', 'v2'])
       })
 
