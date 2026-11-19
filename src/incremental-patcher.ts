@@ -1,3 +1,4 @@
+import {isRecord} from './guards'
 import {Patcher} from './internal-patcher'
 import type {ObjectModel} from './object-model'
 import type {RawPatch} from './patch'
@@ -64,9 +65,11 @@ class IncrementalModel<T> implements ObjectModel<
 
   asObject(value: Value<T>): ObjectContent<T> {
     if (!value.content) {
+      let data = value.data
+      if (!isRecord(data)) throw new Error('expected an object')
       let fields: ObjectContent<T>['fields'] = {}
-      for (let [key, val] of Object.entries(value.data as any)) {
-        fields[key] = this.wrapWithMeta(val, value.startMeta)
+      for (let key of Object.keys(data)) {
+        fields[key] = this.wrapWithMeta(data[key], value.startMeta)
       }
       value.content = {type: 'object', fields}
     }
@@ -158,7 +161,8 @@ class IncrementalModel<T> implements ObjectModel<
           val.endMeta = this.meta
         }
       } else {
-        for (let val of Object.values(content.fields)) {
+        for (let key of Object.keys(content.fields)) {
+          let val = content.fields[key]
           if (val.content && val.endMeta !== this.meta) {
             this.updateEndMeta(val.content)
           }
