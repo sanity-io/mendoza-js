@@ -427,6 +427,61 @@ describe('incremental', () => {
         expect(unwrap(v1)).toBe('abcdef')
       })
 
+      test('splitting a part that occurs several times in the same string', () => {
+        const v1 = wrap('ab', 'v1')
+        const v2 = applyPatch(
+          v1,
+          [Op.Blank, Op.StringAppendSlice, 0, 2, Op.StringAppendSlice, 0, 2],
+          'v2',
+        )
+        const v3 = applyPatch(v2, [Op.Blank, Op.StringAppendSlice, 0, 1], 'v3')
+        expect(unwrap(v3)).toBe('a')
+
+        if (!v2.content || v2.content.type !== 'string') throw new Error('expected string')
+        expect(v2.content.parts.map((p) => p.value).join('')).toBe('abab')
+      })
+
+      test('splitting a later occurrence of a repeated part', () => {
+        const v2 = applyPatch(
+          wrap('ab', 'v1'),
+          [Op.Blank, Op.StringAppendSlice, 0, 2, Op.StringAppendSlice, 0, 2],
+          'v2',
+        )
+        const v3 = applyPatch(v2, [Op.Blank, Op.StringAppendSlice, 2, 3], 'v3')
+        expect(unwrap(v3)).toBe('a')
+      })
+
+      test('earlier versions see parts split by later versions', () => {
+        const v1 = wrap('abcdef', 'v1')
+        const v2 = applyPatch(v1, [Op.Blank, Op.StringAppendSlice, 0, 3], 'v2')
+        const v3 = applyPatch(
+          v2,
+          [Op.Blank, Op.StringAppendSlice, 0, 1, Op.StringAppendString, 'x'],
+          'v3',
+        )
+        expect(unwrap(v3)).toBe('ax')
+
+        const partsOf = (value: incremental.Value<string>) => {
+          if (!value.content || value.content.type !== 'string') throw new Error('expected string')
+          return value.content.parts.map((p) => [p.value, p.startMeta, p.endMeta])
+        }
+
+        // `abc` was split by v3, which only kept `a`
+        expect(partsOf(v1)).toEqual([
+          ['a', 'v1', 'v3'],
+          ['bc', 'v1', 'v2'],
+          ['def', 'v1', 'v1'],
+        ])
+        expect(partsOf(v2)).toEqual([
+          ['a', 'v1', 'v3'],
+          ['bc', 'v1', 'v2'],
+        ])
+        expect(partsOf(v3)).toEqual([
+          ['a', 'v1', 'v3'],
+          ['x', 'v3', 'v3'],
+        ])
+      })
+
       describe('UTF-8 indexing', () => {
         test.each([
           ['héllo', 0, 3, 'hé'],
