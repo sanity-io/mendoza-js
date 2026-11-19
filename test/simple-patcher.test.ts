@@ -507,6 +507,44 @@ describe('applyPatch', () => {
         ])
         expect(result).toBe('😀€éaz')
       })
+
+      test('consecutive ascending slices', () => {
+        const input = 'aé€😀z'.repeat(3)
+        // Each repetition is 11 bytes. Keep every other character of every repetition.
+        const patch: unknown[] = [Op.Blank]
+        for (const offset of [0, 11, 22]) {
+          patch.push(Op.StringAppendSlice, offset, offset + 1)
+          patch.push(Op.StringAppendSlice, offset + 3, offset + 6)
+          patch.push(Op.StringAppendSlice, offset + 10, offset + 11)
+        }
+        expect(applyPatch(input, patch)).toBe('a€z'.repeat(3))
+      })
+
+      test('slices from several strings in the same patch', () => {
+        const doc = {a: 'é€😀', b: '😀€é'}
+        // a: é=0..2, €=2..5, 😀=5..9 / b: 😀=0..4, €=4..7, é=7..9
+        const result = applyPatch(doc, [
+          Op.PushFieldBlank,
+          0,
+          Op.StringAppendSlice,
+          2,
+          5,
+          Op.StringAppendSlice,
+          5,
+          9,
+          Op.ReturnIntoObjectSameKeyPop,
+          Op.PushFieldBlank,
+          1,
+          Op.StringAppendSlice,
+          4,
+          7,
+          Op.StringAppendSlice,
+          7,
+          9,
+          Op.ReturnIntoObjectSameKeyPop,
+        ])
+        expect(result).toEqual({a: '€😀', b: '€é'})
+      })
     })
   })
 
