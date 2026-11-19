@@ -1,5 +1,18 @@
 <!-- markdownlint-disable --><!-- textlint-disable -->
 
+## 4.0.0
+
+### Major Changes
+
+- esm-only, require node >= 22.12, modernize tooling ([#96](https://github.com/sanity-io/mendoza-js/pull/96)) ([f45aa14](https://github.com/sanity-io/mendoza-js/commit/f45aa14fb7cb0044c72e7db02a371bc23cb30b20))
+
+  BREAKING CHANGES:
+
+  - The package is now ESM-only. The CommonJS build (`dist/index.cjs`) and the `main` field are gone, so `require('mendoza')` only works on runtimes with `require(esm)`, which includes Node 22.12 and later.
+  - The minimum supported Node version is now 22.12.
+
+  Also new: the `Op` opcode table is now exported, for building and reading raw patches.
+
 # 📓 Changelog
 
 All notable changes to this project will be documented in this file. See
