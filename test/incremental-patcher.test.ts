@@ -256,6 +256,16 @@ describe('incremental', () => {
         expect(unwrap(result)).toEqual([[3], ['z']])
       })
 
+      test('handles slices larger than the maximum argument count', () => {
+        const doc = Array.from({length: 1_000_000}, (_, i) => i)
+        const result = applyPatch(
+          wrap(doc, 'v1'),
+          [Op.Blank, Op.ArrayAppendSlice, 0, doc.length],
+          'v2',
+        )
+        expect(unwrap(result)).toEqual(doc)
+      })
+
       test('reordered slices get the current meta', () => {
         const v1 = wrap(['a', 'b', 'c'], 'v1')
         const v2 = applyPatch(v1, [Op.Blank, Op.ArrayAppendSlice, 1, 3], 'v2')

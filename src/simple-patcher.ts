@@ -2,6 +2,7 @@ import {Patcher} from './internal-patcher'
 import type {ObjectModel} from './object-model'
 import type {RawPatch} from './patch'
 import {utf8resolveIndex} from './utf8'
+import {pushSlice} from './array'
 
 type StringBuilder = {type: 'string'; data: string}
 type ObjectBuilder = {type: 'object'; data: {[key: string]: unknown}}
@@ -81,7 +82,7 @@ class SimpleModel implements ObjectModel<unknown, StringBuilder, ObjectBuilder, 
   }
 
   arrayAppendSlice(target: ArrayBuilder, source: unknown, left: number, right: number): void {
-    target.push(...(source as ArrayBuilder).slice(left, right))
+    pushSlice(target, source as ArrayBuilder, left, right)
   }
 
   stringAppendSlice(target: StringBuilder, source: unknown, left: number, right: number): void {

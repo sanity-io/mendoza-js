@@ -38,8 +38,7 @@ group(() => {
 })
 
 group(() => {
-  // Larger slices currently overflow the call stack.
-  for (const length of [10_000, 100_000]) {
+  for (const length of [10_000, 100_000, 1_000_000]) {
     const {doc, patch} = largeArraySlice(length)
     bench(`incremental: array slice, length=${length}`, () => applyFresh(doc, patch))
   }
