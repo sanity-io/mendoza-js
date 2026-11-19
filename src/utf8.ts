@@ -21,12 +21,15 @@ export function utf8stringSize(str: string): number {
   return b
 }
 
-/** Converts an UTF-8 byte index into a UCS-2 index. */
-export function utf8resolveIndex(str: string, idx: number) {
-  let byteCount = 0
-  let ucsIdx = 0
+/**
+ * Converts an UTF-8 byte index into a UCS-2 index. Scanning starts at `fromByte`/`fromUcs`, which
+ * must point to the same position in the string (defaults to the start of the string).
+ */
+export function utf8resolveIndex(str: string, idx: number, fromByte = 0, fromUcs = 0): number {
+  let byteCount = fromByte
+  let ucsIdx = fromUcs
 
-  for (ucsIdx = 0; byteCount < idx; ucsIdx++) {
+  for (; byteCount < idx; ucsIdx++) {
     let code = str.codePointAt(ucsIdx)!
     let size = utf8charSize(code)
     if (size === 4) ucsIdx++ // Surrogate pair.

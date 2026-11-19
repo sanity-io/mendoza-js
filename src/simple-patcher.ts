@@ -7,7 +7,14 @@ type StringBuilder = {type: 'string'; data: string}
 type ObjectBuilder = {type: 'object'; data: {[key: string]: unknown}}
 type ArrayBuilder = unknown[]
 
+type StringCursor = {source: string; byte: number; ucs: number}
+
 class SimpleModel implements ObjectModel<unknown, StringBuilder, ObjectBuilder, ArrayBuilder> {
+  // Slices of a source string are usually appended in ascending order. Remembering where the
+  // previous slice ended means we don't rescan the string from the start for every slice, which
+  // would make long strings with many slices quadratic.
+  stringCursor: StringCursor | null = null
+
   wrap(data: any): unknown {
     return data
   }
@@ -80,10 +87,21 @@ class SimpleModel implements ObjectModel<unknown, StringBuilder, ObjectBuilder, 
   stringAppendSlice(target: StringBuilder, source: unknown, left: number, right: number): void {
     const sourceString = source as string
 
-    const leftPos = utf8resolveIndex(sourceString, left)
-    const rightPos = utf8resolveIndex(sourceString, right)
+    const leftPos = this.resolveStringIndex(sourceString, left)
+    const rightPos = this.resolveStringIndex(sourceString, right)
 
     target.data += sourceString.slice(leftPos, rightPos)
+  }
+
+  resolveStringIndex(source: string, byteIdx: number): number {
+    let cursor = this.stringCursor
+    if (!cursor || cursor.source !== source || cursor.byte > byteIdx) {
+      cursor = {source, byte: 0, ucs: 0}
+    }
+
+    const ucs = utf8resolveIndex(source, byteIdx, cursor.byte, cursor.ucs)
+    this.stringCursor = {source, byte: byteIdx, ucs}
+    return ucs
   }
 
   stringAppendValue(target: StringBuilder, value: unknown): void {
