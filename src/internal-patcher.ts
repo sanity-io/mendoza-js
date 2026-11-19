@@ -64,7 +64,7 @@ export class Patcher<V, S, O, A> {
     this.inputStack.push({value: this.root})
     this.outputStack.push({value: this.root})
 
-    for (; this.i < this.patch.length; ) {
+    for (; this.i < this.patch.length;) {
       let opcode = this.read() as number
       let op = OPS[opcode]
       if (!op) throw new Error(`Unknown opcode: ${opcode}`)
@@ -183,6 +183,15 @@ export class Patcher<V, S, O, A> {
     let entry = this.inputEntry()
     let value = this.model.arrayGetElement(entry.value, idx)
     this.inputStack.push({value})
+  }
+
+  processPushParent() {
+    let n = this.read() as number
+    let idx = this.inputStack.length - 2 - n
+    if (idx < 0 || idx >= this.inputStack.length) {
+      throw new Error('PushParent: no such parent in the input stack')
+    }
+    this.inputStack.push(this.inputStack[idx])
   }
 
   processPop() {

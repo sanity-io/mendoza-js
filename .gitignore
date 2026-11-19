@@ -1,5 +1,4 @@
-/node_modules
-/yarn.lock
-.nyc_output
+node_modules
 coverage
 /dist
+.vitest/

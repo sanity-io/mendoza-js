@@ -1,20 +1,13 @@
 {
-  "extends": "@sanity/pkg-utils/tsconfig/strictest.json",
+  "extends": "@sanity/tsconfig/strictest",
   "compilerOptions": {
-    "noEmit": true,
-
-    // Strict type-checking
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-
-    // Additional checks
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "useUnknownInCatchVariables": true
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": ".",
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "paths": {
+      "mendoza": ["./src/index.ts"]
+    }
   }
 }

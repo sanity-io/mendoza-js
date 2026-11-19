@@ -1,0 +1,44 @@
+---
+name: Format
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: Can the code be formatted? 🤔
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          cache: pnpm
+          node-version: lts/*
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: npx oxfmt
+      - run: git restore .github/workflows
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ secrets.ECOSPARK_APP_ID }}
+          private-key: ${{ secrets.ECOSPARK_APP_PRIVATE_KEY }}
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        with:
+          author: github-actions <41898282+github-actions[bot]@users.noreply.github.com>
+          body: I ran `npx oxfmt` 🧑‍💻
+          branch: actions/format
+          commit-message: 'chore(format): 🤖 ✨'
+          labels: 🤖 bot
+          sign-commits: true
+          title: 'chore(format): 🤖 ✨'
+          token: ${{ steps.app-token.outputs.token }}

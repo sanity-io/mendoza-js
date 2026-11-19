@@ -41,9 +41,12 @@ export type StringPart<T> = {
   endMeta: T
 }
 
-class IncrementalModel<T>
-  implements ObjectModel<Value<T>, StringContent<T>, ObjectContent<T>, ArrayContent<T>>
-{
+class IncrementalModel<T> implements ObjectModel<
+  Value<T>,
+  StringContent<T>,
+  ObjectContent<T>,
+  ArrayContent<T>
+> {
   meta: T
 
   constructor(meta: T) {

@@ -1,9 +1,4 @@
 {
   "extends": "./tsconfig.settings",
-  "include": ["./src", "./test"],
-  "compilerOptions": {
-    "paths": {
-      "mendoza": ["./src"]
-    }
-  }
+  "include": ["./src", "./test"]
 }
