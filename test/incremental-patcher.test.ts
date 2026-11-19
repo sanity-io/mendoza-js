@@ -251,6 +251,22 @@ describe('incremental', () => {
         expect(v2.content.metas).toEqual(['v2', 'v2', 'v2', 'v2'])
       })
 
+      test('appending to a copied array leaves the previous version untouched', () => {
+        const v1 = wrap({list: [1, 2]}, 'v1')
+        const v2 = applyPatch(
+          v1,
+          [Op.PushFieldCopy, 0, Op.ArrayAppendValue, 3, Op.ReturnIntoObjectSameKeyPop],
+          'v2',
+        )
+        expect(unwrap(v2)).toEqual({list: [1, 2, 3]})
+
+        if (!v1.content || v1.content.type !== 'object') throw new Error('expected object')
+        const list = v1.content.fields['list'].content
+        if (!list || list.type !== 'array') throw new Error('expected array')
+        expect(list.elements.map((element) => unwrap(element))).toEqual([1, 2])
+        expect(list.metas).toHaveLength(2)
+      })
+
       test('editing an element in place', () => {
         const result = applyPatch(
           wrap({list: [{id: 1}, {id: 2}, {id: 3}]}, 'v1'),

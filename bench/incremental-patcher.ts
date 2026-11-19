@@ -1,6 +1,7 @@
 import {bench, do_not_optimize, group} from 'mitata'
 import {incremental, type RawPatch} from 'mendoza'
 import {
+  appendToArray,
   editEveryElement,
   largeArraySlice,
   longStringSlices,
@@ -41,6 +42,13 @@ group(() => {
   for (const length of [10_000, 100_000, 1_000_000]) {
     const {doc, patch} = largeArraySlice(length)
     bench(`incremental: array slice, length=${length}`, () => applyFresh(doc, patch))
+  }
+})
+
+group(() => {
+  for (const length of [1_000, 100_000]) {
+    const {doc, patch} = appendToArray(length)
+    bench(`incremental: append to array, length=${length}`, () => applyFresh(doc, patch))
   }
 })
 
