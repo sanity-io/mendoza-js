@@ -6,6 +6,14 @@ export interface Fixture<T> {
 }
 
 /**
+ * Real documents come from `JSON.parse()`, which gives V8 objects with a different (and for
+ * copying, much faster) internal layout than objects built up by assigning keys in a loop.
+ */
+function fromJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value))
+}
+
+/**
  * An object with `width` keys under `items`, and a patch that changes a single nested field.
  * Exercises object copying and key sorting, which scale with the width of the object.
  */
@@ -27,7 +35,7 @@ export function wideObjectEdit(width: number): Fixture<{items: Record<string, un
     Op.ReturnIntoObjectSameKeyPop,
   ]
 
-  return {doc: {items}, patch}
+  return {doc: fromJson({items}), patch}
 }
 
 /**
@@ -41,7 +49,7 @@ export function editEveryElement(length: number): Fixture<{items: unknown[]}> {
     patch.push(Op.PushElementCopy, i, Op.ObjectSetFieldValue, i + 1, 'n', Op.ReturnIntoArrayPop)
   }
   patch.push(Op.ReturnIntoObjectSameKeyPop)
-  return {doc: {items}, patch}
+  return {doc: fromJson({items}), patch}
 }
 
 export const STRING_SLICE_CASES = [
@@ -97,5 +105,5 @@ export function typingSession(count: number): {doc: {body: string}; patches: Raw
     ])
     length++
   }
-  return {doc: {body}, patches}
+  return {doc: fromJson({body}), patches}
 }
