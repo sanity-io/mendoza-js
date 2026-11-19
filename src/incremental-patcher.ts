@@ -195,9 +195,10 @@ class IncrementalModel<T> implements ObjectModel<
   }
 
   copyArray(value: Value<T> | null): ArrayContent<T> {
+    // The copy is appended to, so it can't share its arrays with the value it was copied from.
     let arr = value ? this.asArray(value) : null
-    let elements = arr ? arr.elements : []
-    let metas = arr ? arr.metas : []
+    let elements = arr ? arr.elements.slice() : []
+    let metas = arr ? arr.metas.slice() : []
 
     return {
       type: 'array',

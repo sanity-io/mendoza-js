@@ -81,6 +81,14 @@ export function largeArraySlice(length: number): Fixture<number[]> {
 }
 
 /**
+ * An array of `length` objects, and a patch that appends a single value to a copy of it.
+ */
+export function appendToArray(length: number): Fixture<unknown[]> {
+  const doc = fromJson(Array.from({length}, (_, i) => ({_key: `k${i}`, n: i})))
+  return {doc, patch: [Op.ArrayAppendValue, {_key: 'new', n: -1}]}
+}
+
+/**
  * A sequence of `count` patches that each insert a single character into the `body` field,
  * simulating someone typing. Each patch applies to the result of the previous one.
  */
