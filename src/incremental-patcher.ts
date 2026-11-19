@@ -79,7 +79,8 @@ class IncrementalModel<T> implements ObjectModel<
       let elements = (value.data as unknown[]).map((item) =>
         this.wrapWithMeta(item, value.startMeta),
       )
-      let metas = elements.map(() => this.meta)
+      // Elements of an unexpanded array have been at their positions since the array itself was.
+      let metas = elements.map(() => value.startMeta)
       value.content = {type: 'array', elements, metas}
     }
 
@@ -220,17 +221,15 @@ class IncrementalModel<T> implements ObjectModel<
 
   arrayAppendSlice(target: ArrayContent<T>, source: Value<T>, left: number, right: number): void {
     let arr = this.asArray(source)
-    let samePosition = arr.elements.length === left
+    // Elements that end up at the same index as in the source keep the meta of when they got
+    // there. Elements that moved get the current one.
+    let samePosition = target.elements.length === left
 
     pushSlice(target.elements, arr.elements, left, right)
 
-    if (samePosition) {
-      pushSlice(target.metas, arr.metas, left, right)
-    } else {
-      const end = Math.min(right, arr.elements.length)
-      for (let i = left; i < end; i++) {
-        target.metas.push(this.meta)
-      }
+    const end = Math.min(right, arr.elements.length)
+    for (let i = left; i < end; i++) {
+      target.metas.push(samePosition ? arr.metas[i] : this.meta)
     }
   }
 
