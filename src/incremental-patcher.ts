@@ -2,6 +2,7 @@ import {Patcher} from './internal-patcher'
 import type {ObjectModel} from './object-model'
 import type {RawPatch} from './patch'
 import {commonPrefix, commonSuffix, utf8charSize, utf8stringSize} from './utf8'
+import {pushSlice} from './array'
 
 // The incremental patcher allows you to apply multiple patches and tracks the history of every element.
 // It also allows you to extract a simple diff between the documents.
@@ -221,12 +222,13 @@ class IncrementalModel<T> implements ObjectModel<
     let arr = this.asArray(source)
     let samePosition = arr.elements.length === left
 
-    target.elements.push(...arr.elements.slice(left, right))
+    pushSlice(target.elements, arr.elements, left, right)
 
     if (samePosition) {
-      target.metas.push(...arr.metas.slice(left, right))
+      pushSlice(target.metas, arr.metas, left, right)
     } else {
-      for (let i = left; i < right; i++) {
+      const end = Math.min(right, arr.elements.length)
+      for (let i = left; i < end; i++) {
         target.metas.push(this.meta)
       }
     }

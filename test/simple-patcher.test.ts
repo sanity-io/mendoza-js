@@ -280,6 +280,13 @@ describe('applyPatch', () => {
       expect(result).toEqual({skills: ['JS', 'TS', 'Go', 'Zig']})
     })
 
+    test('ArrayAppendSlice handles slices larger than the maximum argument count', () => {
+      const doc = Array.from({length: 1_000_000}, (_, i) => i)
+      const result = applyPatch(doc, [Op.Blank, Op.ArrayAppendSlice, 0, doc.length])
+      expect(result).toHaveLength(doc.length)
+      expect(result).toEqual(doc)
+    })
+
     test('ArrayAppendSlice with an empty range appends nothing', () => {
       expect(applyPatch([1, 2, 3], [Op.Blank, Op.ArrayAppendSlice, 1, 1])).toEqual([])
     })
