@@ -4,6 +4,15 @@ import {Op} from '../src/index'
 
 const {applyPatch, getType, rebaseValue, unwrap, wrap} = incremental
 
+// Reads a string from its parts rather than the data cached by `unwrap()`, so tests see what later
+// patches did to the parts of earlier versions.
+function textOf(value: incremental.Value<string>): string {
+  if (value.content?.type === 'string')
+    return value.content.parts.map((part) => part.value).join('')
+  if (typeof value.data === 'string') return value.data
+  throw new Error('expected a string value')
+}
+
 describe('incremental', () => {
   describe('wrap / unwrap', () => {
     test('wrap records the origin as start and end meta', () => {
@@ -427,6 +436,109 @@ describe('incremental', () => {
         expect(unwrap(v1)).toBe('abcdef')
       })
 
+      test('splitting a part that occurs several times in the same string', () => {
+        const v1 = wrap('ab', 'v1')
+        const v2 = applyPatch(
+          v1,
+          [Op.Blank, Op.StringAppendSlice, 0, 2, Op.StringAppendSlice, 0, 2],
+          'v2',
+        )
+        const v3 = applyPatch(v2, [Op.Blank, Op.StringAppendSlice, 0, 1], 'v3')
+        expect(unwrap(v3)).toBe('a')
+
+        if (!v2.content || v2.content.type !== 'string') throw new Error('expected string')
+        expect(v2.content.parts.map((p) => p.value).join('')).toBe('abab')
+      })
+
+      test('splitting a later occurrence of a repeated part', () => {
+        const v2 = applyPatch(
+          wrap('ab', 'v1'),
+          [Op.Blank, Op.StringAppendSlice, 0, 2, Op.StringAppendSlice, 0, 2],
+          'v2',
+        )
+        const v3 = applyPatch(v2, [Op.Blank, Op.StringAppendSlice, 2, 3], 'v3')
+        expect(unwrap(v3)).toBe('a')
+      })
+
+      test('appending a slice to a copy of the string it is split from', () => {
+        const v1 = wrap('abcd', 'v1')
+        // Copies `abcd`, then splits it to append `cd`, which the copy already contains
+        const v2 = applyPatch(v1, [Op.StringAppendSlice, 2, 4], 'v2')
+        const v3 = applyPatch(
+          v2,
+          [Op.Blank, Op.StringAppendSlice, 5, 6, Op.StringAppendSlice, 0, 4],
+          'v3',
+        )
+        expect(textOf(v2)).toBe('abcdcd')
+        expect(textOf(v3)).toBe('dabcd')
+      })
+
+      test('appending a slice to a copy of the same string', () => {
+        const v2 = applyPatch(wrap('abcd', 'v1'), [Op.StringAppendSlice, 0, 4], 'v2')
+        const v3 = applyPatch(v2, [Op.Blank, Op.StringAppendSlice, 6, 8], 'v3')
+        expect(textOf(v2)).toBe('abcdabcd')
+        expect(textOf(v3)).toBe('cd')
+      })
+
+      test('appending a slice split off a part appended earlier in the same patch', () => {
+        const v2 = applyPatch(
+          wrap('abcd', 'v1'),
+          [Op.Blank, Op.StringAppendSlice, 0, 4, Op.StringAppendSlice, 2, 4],
+          'v2',
+        )
+        const v3 = applyPatch(v2, [Op.Blank, Op.StringAppendSlice, 4, 5], 'v3')
+        expect(textOf(v2)).toBe('abcdcd')
+        expect(textOf(v3)).toBe('c')
+      })
+
+      test('appending a multi-byte slice split off a part appended earlier', () => {
+        // é=2 bytes, €=3 bytes, 😀=4 bytes: é=0..2, €=2..5, 😀=5..9
+        const v2 = applyPatch(
+          wrap('é€😀', 'v1'),
+          [Op.Blank, Op.StringAppendSlice, 0, 9, Op.StringAppendSlice, 2, 9],
+          'v2',
+        )
+        // v2: é=0..2, €=2..5, 😀=5..9, €=9..12, 😀=12..16
+        const v3 = applyPatch(
+          v2,
+          [Op.Blank, Op.StringAppendSlice, 12, 16, Op.StringAppendSlice, 2, 5],
+          'v3',
+        )
+        expect(textOf(v2)).toBe('é€😀€😀')
+        expect(textOf(v3)).toBe('😀€')
+      })
+
+      test('earlier versions see parts split by later versions', () => {
+        const v1 = wrap('abcdef', 'v1')
+        const v2 = applyPatch(v1, [Op.Blank, Op.StringAppendSlice, 0, 3], 'v2')
+        const v3 = applyPatch(
+          v2,
+          [Op.Blank, Op.StringAppendSlice, 0, 1, Op.StringAppendString, 'x'],
+          'v3',
+        )
+        expect(unwrap(v3)).toBe('ax')
+
+        const partsOf = (value: incremental.Value<string>) => {
+          if (!value.content || value.content.type !== 'string') throw new Error('expected string')
+          return value.content.parts.map((p) => [p.value, p.startMeta, p.endMeta])
+        }
+
+        // `abc` was split by v3, which only kept `a`
+        expect(partsOf(v1)).toEqual([
+          ['a', 'v1', 'v3'],
+          ['bc', 'v1', 'v2'],
+          ['def', 'v1', 'v1'],
+        ])
+        expect(partsOf(v2)).toEqual([
+          ['a', 'v1', 'v3'],
+          ['bc', 'v1', 'v2'],
+        ])
+        expect(partsOf(v3)).toEqual([
+          ['a', 'v1', 'v3'],
+          ['x', 'v3', 'v3'],
+        ])
+      })
+
       describe('UTF-8 indexing', () => {
         test.each([
           ['héllo', 0, 3, 'hé'],
@@ -487,6 +599,77 @@ describe('incremental', () => {
           expect(unwrap(v3)).toBe('😀€')
         })
       })
+    })
+  })
+
+  describe('string histories', () => {
+    // Small seeded PRNG (mulberry32), so failures are reproducible
+    function random(seed: number): () => number {
+      return () => {
+        seed = (seed + 0x6d2b79f5) | 0
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+      }
+    }
+
+    const alphabet = ['a', 'b', 'c', 'é', '€', '😀']
+
+    function byteOffsets(str: string): number[] {
+      const offsets = [0]
+      let bytes = 0
+      for (const char of str) {
+        const code = char.codePointAt(0) ?? 0
+        bytes += code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4
+        offsets.push(bytes)
+      }
+      return offsets
+    }
+
+    test('random patches on shared string parts', () => {
+      for (let sequence = 0; sequence < 300; sequence++) {
+        const rand = random(sequence)
+        const pick = <T>(items: T[]): T => items[Math.floor(rand() * items.length)]
+        const randomText = (max: number) =>
+          Array.from({length: 1 + Math.floor(rand() * max)}, () => pick(alphabet)).join('')
+
+        const versions = [{value: wrap(randomText(8), 'v0'), text: ''}]
+        versions[0].text = textOf(versions[0].value)
+
+        for (let step = 1; step <= 10; step++) {
+          // Patch a random earlier version, so parts are shared between branches of the history
+          const base = pick(versions)
+          const offsets = byteOffsets(base.text)
+          const chars = [...base.text]
+
+          const blank = rand() < 0.7
+          const patch: unknown[] = blank ? [Op.Blank] : []
+          let expected = blank ? '' : base.text
+
+          for (let op = Math.floor(rand() * 5); op >= 0; op--) {
+            if (rand() < 0.75) {
+              const a = Math.floor(rand() * offsets.length)
+              const b = Math.floor(rand() * offsets.length)
+              const [left, right] = a <= b ? [a, b] : [b, a]
+              patch.push(Op.StringAppendSlice, offsets[left], offsets[right])
+              expected += chars.slice(left, right).join('')
+            } else {
+              const text = randomText(3)
+              patch.push(Op.StringAppendString, text)
+              expected += text
+            }
+          }
+
+          const value = applyPatch(base.value, patch, `v${step}`)
+          versions.push({value, text: expected})
+
+          for (const [i, version] of versions.entries()) {
+            expect(textOf(version.value), `sequence ${sequence}, step ${step}, version ${i}`).toBe(
+              version.text,
+            )
+          }
+        }
+      }
     })
   })
 

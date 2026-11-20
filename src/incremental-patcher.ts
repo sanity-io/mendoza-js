@@ -1,6 +1,7 @@
 import {isRecord} from './guards'
 import {Patcher} from './internal-patcher'
 import type {ObjectModel} from './object-model'
+import {type ChainedStringPart, IncrementalString} from './incremental-string'
 import type {RawPatch} from './patch'
 import {commonPrefix, commonSuffix, utf8charSize, utf8stringSize} from './utf8'
 import {pushSlice} from './array'
@@ -38,14 +39,13 @@ export type StringContent<T> = {
 export type StringPart<T> = {
   value: string
   utf8size: number
-  uses: StringContent<T>[]
   startMeta: T
   endMeta: T
 }
 
 class IncrementalModel<T> implements ObjectModel<
   Value<T>,
-  StringContent<T>,
+  IncrementalString<T>,
   ObjectContent<T>,
   ArrayContent<T>
 > {
@@ -90,34 +90,28 @@ class IncrementalModel<T> implements ObjectModel<
     return value.content as ArrayContent<T>
   }
 
-  asString(value: Value<T>): StringContent<T> {
+  asString(value: Value<T>): IncrementalString<T> {
     if (!value.content) {
       let str = value.data as string
 
-      let part: StringPart<T> = {
+      let part: ChainedStringPart<T> = {
         value: str,
         utf8size: utf8stringSize(str),
-        uses: [],
         startMeta: value.startMeta,
         endMeta: value.endMeta,
+        next: null,
+        owner: -1,
       }
-      value.content = this.stringFromParts([part])
+      let content = new IncrementalString([part])
+      value.content = content
+      return content
     }
 
-    return value.content as StringContent<T>
-  }
-
-  stringFromParts(parts: StringPart<T>[]): StringContent<T> {
-    let str: StringContent<T> = {
-      type: 'string',
-      parts,
+    if (!(value.content instanceof IncrementalString)) {
+      throw new Error('expected string content')
     }
 
-    for (let part of parts) {
-      part.uses.push(str)
-    }
-
-    return str
+    return value.content
   }
 
   objectGetKeys(value: Value<T>): string[] {
@@ -172,16 +166,8 @@ class IncrementalModel<T> implements ObjectModel<
     }
   }
 
-  copyString(value: Value<T> | null): StringContent<T> {
-    if (value) {
-      let other = this.asString(value)
-      return this.stringFromParts(other.parts.slice())
-    } else {
-      return {
-        type: 'string',
-        parts: [],
-      }
-    }
+  copyString(value: Value<T> | null): IncrementalString<T> {
+    return new IncrementalString(value ? this.asString(value).parts.slice() : [])
   }
 
   copyObject(value: Value<T> | null): ObjectContent<T> {
@@ -238,23 +224,19 @@ class IncrementalModel<T> implements ObjectModel<
     }
   }
 
-  stringAppendValue(target: StringContent<T>, value: Value<T>): void {
+  stringAppendValue(target: IncrementalString<T>, value: Value<T>): void {
     let str = this.asString(value)
     for (let part of str.parts) {
-      this.stringAppendPart(target, part)
+      target.append(part)
     }
   }
 
-  stringAppendPart(target: StringContent<T>, part: StringPart<T>): void {
-    target.parts.push(part)
-    part.uses.push(target)
-  }
-
-  resolveStringPart(str: StringContent<T>, from: number, len: number): number {
+  resolveStringPart(str: IncrementalString<T>, from: number, len: number): number {
     if (len === 0) return from
 
-    for (let i = from; i < str.parts.length; i++) {
-      let part = str.parts[i]
+    let parts = str.parts
+    for (let i = from; i < parts.length; i++) {
+      let part = parts[i]
 
       if (len === part.utf8size) {
         // Matches perfect!
@@ -263,7 +245,7 @@ class IncrementalModel<T> implements ObjectModel<
 
       if (len < part.utf8size) {
         // It's a part of this chunk. We now need to split it up.
-        this.splitString(part, len)
+        this.splitString(str, i, len)
         return i + 1
       }
 
@@ -273,11 +255,9 @@ class IncrementalModel<T> implements ObjectModel<
     throw new Error('splitting string out of bounds')
   }
 
-  splitString(part: StringPart<T>, idx: number) {
-    let leftValue
-    let rightValue
+  splitString(str: IncrementalString<T>, partIndex: number, idx: number): void {
+    let part = str.parts[partIndex]
     let leftSize = idx
-    let rightSize = part.utf8size - leftSize
 
     // idx is here in UTF-8 index, not codepoint index.
     // This means we might to adjust for multi-byte characters.
@@ -292,36 +272,22 @@ class IncrementalModel<T> implements ObjectModel<
       }
     }
 
-    leftValue = part.value.slice(0, idx)
-    rightValue = part.value.slice(idx)
-
-    let newPart: StringPart<T> = {
-      value: rightValue,
-      utf8size: rightSize,
-      uses: part.uses.slice(),
-      startMeta: part.startMeta,
-      endMeta: part.endMeta,
-    }
-
-    part.value = leftValue
-    part.utf8size = leftSize
-
-    for (let use of part.uses) {
-      // Insert the new part.
-      let ndx = use.parts.indexOf(part)
-      if (ndx === -1) throw new Error('bug: mismatch between string parts and use.')
-      use.parts.splice(ndx + 1, 0, newPart)
-    }
+    str.splitPart(partIndex, idx, leftSize)
   }
 
-  stringAppendSlice(target: StringContent<T>, source: Value<T>, left: number, right: number): void {
+  stringAppendSlice(
+    target: IncrementalString<T>,
+    source: Value<T>,
+    left: number,
+    right: number,
+  ): void {
     let str = this.asString(source)
     let firstPart = this.resolveStringPart(str, 0, left)
     let lastPart = this.resolveStringPart(str, firstPart, right - left)
 
+    let parts = str.parts
     for (let i = firstPart; i < lastPart; i++) {
-      let part = str.parts[i]
-      this.stringAppendPart(target, part)
+      target.append(parts[i])
     }
   }
 }
