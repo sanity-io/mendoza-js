@@ -1,3 +1,4 @@
+import {isRecord} from './guards'
 import {Patcher} from './internal-patcher'
 import type {ObjectModel} from './object-model'
 import type {RawPatch} from './patch'
@@ -45,16 +46,10 @@ class SimpleModel implements ObjectModel<unknown, StringBuilder, ObjectBuilder, 
   }
 
   copyObject(value: unknown | null): ObjectBuilder {
-    let res: ObjectBuilder = {
+    return {
       type: 'object',
-      data: {},
+      data: isRecord(value) ? {...value} : {},
     }
-    if (value !== null) {
-      for (let [key, val] of Object.entries(value as ObjectBuilder)) {
-        res.data[key] = val
-      }
-    }
-    return res
   }
 
   copyArray(value: unknown | null): ArrayBuilder {
