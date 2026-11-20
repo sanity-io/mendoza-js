@@ -6,7 +6,7 @@ import type {StringContent, StringPart} from './incremental-patcher'
  */
 export type ChainedStringPart<T> = StringPart<T> & {
   next: ChainedStringPart<T> | null
-  /** ID of the last string this part was added to. */
+  /** ID of the last string this part, or the part it was split from, was added to. */
   owner: number
 }
 
@@ -79,7 +79,9 @@ export class IncrementalString<T> implements StringContent<T> {
       startMeta: part.startMeta,
       endMeta: part.endMeta,
       next: part.next,
-      owner: this.#id,
+      // The new part is in every string the original part is in, including the one that last
+      // added it, which may still be appending parts.
+      owner: part.owner,
     }
     part.value = part.value.slice(0, ucsIndex)
     part.utf8size = leftSize
