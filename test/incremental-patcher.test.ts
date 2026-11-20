@@ -531,6 +531,37 @@ describe('incremental', () => {
       ])
     })
 
+    test('string rebase with a common suffix that ends in a surrogate pair', () => {
+      const result = rebaseValue(wrap('a😀', 'v1'), wrap('b😀', 'v2'))
+      expect(unwrap(result)).toBe('b😀')
+      if (!result.content || result.content.type !== 'string') throw new Error('expected string')
+      expect(result.content.parts.map((p) => [p.value, p.startMeta])).toEqual([
+        ['b', 'v2'],
+        ['😀', 'v1'],
+      ])
+    })
+
+    test('string rebase with a common suffix of mixed multi-byte characters', () => {
+      const result = rebaseValue(wrap('x😀€é🎉', 'v1'), wrap('y😀€é🎉', 'v2'))
+      expect(unwrap(result)).toBe('y😀€é🎉')
+      if (!result.content || result.content.type !== 'string') throw new Error('expected string')
+      expect(result.content.parts.map((p) => [p.value, p.startMeta])).toEqual([
+        ['y', 'v2'],
+        ['😀€é🎉', 'v1'],
+      ])
+    })
+
+    test('string rebase finds the whole common suffix after a multi-byte prefix', () => {
+      const result = rebaseValue(wrap('éab', 'v1'), wrap('éxab', 'v2'))
+      expect(unwrap(result)).toBe('éxab')
+      if (!result.content || result.content.type !== 'string') throw new Error('expected string')
+      expect(result.content.parts.map((p) => [p.value, p.startMeta])).toEqual([
+        ['é', 'v1'],
+        ['x', 'v2'],
+        ['ab', 'v1'],
+      ])
+    })
+
     test('completely different strings', () => {
       const result = rebaseValue(wrap('abc', 'v1'), wrap('xyz', 'v2'))
       expect(unwrap(result)).toBe('xyz')
