@@ -50,16 +50,36 @@ export function commonPrefix(str: string, str2: string) {
   return b
 }
 
+/**
+ * Returns the length in UTF-8 bytes of the common suffix of two strings, not overlapping a common
+ * prefix of `prefix` UTF-8 bytes.
+ */
 export function commonSuffix(str: string, str2: string, prefix: number = 0) {
-  let len = Math.min(str.length, str2.length) - prefix
+  // The prefix is in UTF-8 bytes, but the strings are indexed in UTF-16 code units
+  let len = Math.min(str.length, str2.length) - utf8resolveIndex(str, prefix)
   let b = 0
   for (let i = 0; i < len;) {
-    let aPoint = str.codePointAt(str.length - 1 - i)!
-    let bPoint = str2.codePointAt(str2.length - 1 - i)!
+    let aPoint = codePointBefore(str, str.length - i)
+    let bPoint = codePointBefore(str2, str2.length - i)
     if (aPoint !== bPoint) return b
     let size = utf8charSize(aPoint)
     b += size
     i += size === 4 ? 2 : 1
   }
   return b
+}
+
+/**
+ * Returns the code point that ends right before UTF-16 index `end`. Unlike `codePointAt()`, this
+ * reads both halves of a surrogate pair when `end - 1` is the second half.
+ */
+function codePointBefore(str: string, end: number): number {
+  let low = str.charCodeAt(end - 1)
+  if (low >= 0xdc00 && low <= 0xdfff && end >= 2) {
+    let high = str.charCodeAt(end - 2)
+    if (high >= 0xd800 && high <= 0xdbff) {
+      return (high - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000
+    }
+  }
+  return low
 }
