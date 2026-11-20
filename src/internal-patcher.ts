@@ -1,32 +1,6 @@
 import type {ObjectModel} from './object-model'
+import {Op} from './ops'
 import type {RawPatch} from './patch'
-
-const OPS = [
-  'Value',
-  'Copy',
-  'Blank',
-  'ReturnIntoArray',
-  'ReturnIntoObject',
-  'ReturnIntoObjectSameKey',
-  'PushField',
-  'PushElement',
-  'PushParent',
-  'Pop',
-  'PushFieldCopy',
-  'PushFieldBlank',
-  'PushElementCopy',
-  'PushElementBlank',
-  'ReturnIntoObjectPop',
-  'ReturnIntoObjectSameKeyPop',
-  'ReturnIntoArrayPop',
-  'ObjectSetFieldValue',
-  'ObjectCopyField',
-  'ObjectDeleteField',
-  'ArrayAppendValue',
-  'ArrayAppendSlice',
-  'StringAppendString',
-  'StringAppendSlice',
-]
 
 type InputEntry<V> = {
   value: V
@@ -65,11 +39,85 @@ export class Patcher<V, S, O, A> {
     this.outputStack.push({value: this.root})
 
     for (; this.i < this.patch.length;) {
-      let opcode = this.read() as number
-      let op = OPS[opcode]
-      if (!op) throw new Error(`Unknown opcode: ${opcode}`)
-      let processor = `process${op}`
-      ;(this as any)[processor].apply(this)
+      let opcode = this.read()
+      // A switch lets the engine dispatch on the opcode directly, instead of building a method
+      // name and looking it up for every operation.
+      switch (opcode) {
+        case Op.Value:
+          this.processValue()
+          break
+        case Op.Copy:
+          this.processCopy()
+          break
+        case Op.Blank:
+          this.processBlank()
+          break
+        case Op.ReturnIntoArray:
+          this.processReturnIntoArray()
+          break
+        case Op.ReturnIntoObject:
+          this.processReturnIntoObject()
+          break
+        case Op.ReturnIntoObjectSameKey:
+          this.processReturnIntoObjectSameKey()
+          break
+        case Op.PushField:
+          this.processPushField()
+          break
+        case Op.PushElement:
+          this.processPushElement()
+          break
+        case Op.PushParent:
+          this.processPushParent()
+          break
+        case Op.Pop:
+          this.processPop()
+          break
+        case Op.PushFieldCopy:
+          this.processPushFieldCopy()
+          break
+        case Op.PushFieldBlank:
+          this.processPushFieldBlank()
+          break
+        case Op.PushElementCopy:
+          this.processPushElementCopy()
+          break
+        case Op.PushElementBlank:
+          this.processPushElementBlank()
+          break
+        case Op.ReturnIntoObjectPop:
+          this.processReturnIntoObjectPop()
+          break
+        case Op.ReturnIntoObjectSameKeyPop:
+          this.processReturnIntoObjectSameKeyPop()
+          break
+        case Op.ReturnIntoArrayPop:
+          this.processReturnIntoArrayPop()
+          break
+        case Op.ObjectSetFieldValue:
+          this.processObjectSetFieldValue()
+          break
+        case Op.ObjectCopyField:
+          this.processObjectCopyField()
+          break
+        case Op.ObjectDeleteField:
+          this.processObjectDeleteField()
+          break
+        case Op.ArrayAppendValue:
+          this.processArrayAppendValue()
+          break
+        case Op.ArrayAppendSlice:
+          this.processArrayAppendSlice()
+          break
+        case Op.StringAppendString:
+          this.processStringAppendString()
+          break
+        case Op.StringAppendSlice:
+          this.processStringAppendSlice()
+          break
+        default:
+          throw new Error(`Unknown opcode: ${opcode}`)
+      }
     }
 
     let entry = this.outputStack.pop()!
