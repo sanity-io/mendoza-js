@@ -1,6 +1,7 @@
 import {bench, do_not_optimize, group} from 'mitata'
 import {applyPatch} from 'mendoza'
 import {
+  appendToArray,
   editEveryElement,
   largeArraySlice,
   longStringSlices,
@@ -36,6 +37,14 @@ group(() => {
   for (const length of [10_000, 100_000, 1_000_000]) {
     const {doc, patch} = largeArraySlice(length)
     bench(`simple: array slice, length=${length}`, () => do_not_optimize(applyPatch(doc, patch)))
+  }
+})
+
+group(() => {
+  for (const length of [1_000, 100_000]) {
+    const {doc, patch} = appendToArray(length)
+    bench(`simple: append to array, length=${length}`, () =>
+      do_not_optimize(applyPatch(doc, patch)))
   }
 })
 
