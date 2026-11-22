@@ -36,6 +36,7 @@
     "provenance": true
   },
   "scripts": {
+    "bench": "node --import ./bench/register.ts bench/index.ts",
     "build": "tsdown",
     "check": "pnpm run format && pnpm run lint:fix && pnpm run knip && pnpm run typecheck",
     "coverage": "vitest run --coverage",
@@ -46,7 +47,7 @@
     "prepublishOnly": "pnpm run build",
     "release": "changeset publish",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p bench"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
@@ -56,6 +57,7 @@
     "@vitest/coverage-v8": "^5.1.1",
     "knip": "^6.45.1",
     "ls-engines": "^0.10.1",
+    "mitata": "^1.0.34",
     "oxfmt": "^0.79.0",
     "oxlint": "^1.94.0",
     "tsdown": "^0.23.7",
