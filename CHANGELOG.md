@@ -1,5 +1,31 @@
 <!-- markdownlint-disable --><!-- textlint-disable -->
 
+## 5.0.0
+
+### Major Changes
+
+- incremental patches on strings no longer get slower, or use more memory, the more versions a string has ([9f085e9](https://github.com/sanity-io/mendoza-js/commit/9f085e9a85a9c6d20f96f5892b9f6479cf849ead))
+
+  This changes how the incremental patcher represents strings, which breaks code that relies on string content being a plain object:
+
+  - `StringPart.uses` has been removed.
+  - String content is now a class instance, and `parts` is a getter rather than an own property. Spreading, `JSON.stringify()`, `structuredClone()` and deep-equality checks no longer see `parts`.
+  - Patching a value with string content that was not created by the incremental patcher (for instance a plain object built by hand or deserialized) throws `expected string content`, even though the exported `StringContent` and `StringPart` types still describe plain objects.
+  - A `parts` array is a snapshot. When a later version splits a part that another version shares, the parts in an array you are holding on to get shorter, but the pieces split off them are only added when you read `parts` again.
+
+### Patch Changes
+
+- `ArrayAppendSlice` no longer overflows the call stack for large slices ([#102](https://github.com/sanity-io/mendoza-js/pull/102)) ([9faa837](https://github.com/sanity-io/mendoza-js/commit/9faa837fc140197f720573988e96041d9bdf90ae))
+- incremental patches that append to an existing array no longer change the array in earlier versions ([#106](https://github.com/sanity-io/mendoza-js/pull/106)) ([0d96836](https://github.com/sanity-io/mendoza-js/commit/0d968364a8397ed1cf5dd50eb1ce64a411100f34))
+- array element metas in the incremental patcher now keep their origin when elements stay in place ([#108](https://github.com/sanity-io/mendoza-js/pull/108)) ([3493b78](https://github.com/sanity-io/mendoza-js/commit/3493b7809e6f00f9edec297b81a0a5412096c1d6))
+
+  Previously, any patch that rebuilt an array gave every element in it the meta of that patch.
+
+- faster object copies when applying patches ([#105](https://github.com/sanity-io/mendoza-js/pull/105)) ([c827920](https://github.com/sanity-io/mendoza-js/commit/c827920332326bbeb28c7808703119792173629a))
+- faster opcode dispatch when applying patches ([#104](https://github.com/sanity-io/mendoza-js/pull/104)) ([ae5141a](https://github.com/sanity-io/mendoza-js/commit/ae5141a48ba71b6204a7a74a0c0c32543db8d18b))
+- avoid rescanning the source string for every string slice in `applyPatch` ([#103](https://github.com/sanity-io/mendoza-js/pull/103)) ([5c5ae69](https://github.com/sanity-io/mendoza-js/commit/5c5ae69993f55b0fdbe4f7d802ecaff9d38b3284))
+- `rebaseValue()` no longer throws when two strings share a suffix that ends in an emoji or another character outside the Basic Multilingual Plane ([#111](https://github.com/sanity-io/mendoza-js/pull/111)) ([0771fcf](https://github.com/sanity-io/mendoza-js/commit/0771fcf34d9785170033b79c394b3f374cb98877))
+
 ## 4.0.0
 
 ### Major Changes
