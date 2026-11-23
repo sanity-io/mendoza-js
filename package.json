@@ -25,11 +25,13 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./incremental": "./src/incremental.ts",
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
       ".": "./dist/index.js",
+      "./incremental": "./dist/incremental.js",
       "./package.json": "./package.json"
     },
     "access": "public",

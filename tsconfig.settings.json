@@ -7,7 +7,8 @@
     "noUncheckedIndexedAccess": false,
     "exactOptionalPropertyTypes": false,
     "paths": {
-      "mendoza": ["./src/index.ts"]
+      "mendoza": ["./src/index.ts"],
+      "mendoza/incremental": ["./src/incremental.ts"]
     }
   }
 }
