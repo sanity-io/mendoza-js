@@ -29,9 +29,7 @@ let right = applyPatch(left, patch);
 Incremental patcher:
 
 ```typescript
-import {incremental} from "mendoza"
-
-const {Value, rebaseValue, wrap, unwrap, getType, applyPatch} = incremental
+import {applyPatch, getType, rebaseValue, unwrap, wrap} from "mendoza/incremental"
 
 // Create an empty initial version:
 const ROOT = wrap(null, null);

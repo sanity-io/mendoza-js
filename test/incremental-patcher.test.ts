@@ -1,12 +1,10 @@
 import {describe, expect, test} from 'vitest'
-import {incremental} from '../src/index'
+import {applyPatch, getType, rebaseValue, unwrap, type Value, wrap} from '../src/incremental'
 import {Op} from '../src/index'
-
-const {applyPatch, getType, rebaseValue, unwrap, wrap} = incremental
 
 // Reads a string from its parts rather than the data cached by `unwrap()`, so tests see what later
 // patches did to the parts of earlier versions.
-function textOf(value: incremental.Value<string>): string {
+function textOf(value: Value<string>): string {
   if (value.content?.type === 'string')
     return value.content.parts.map((part) => part.value).join('')
   if (typeof value.data === 'string') return value.data
@@ -518,7 +516,7 @@ describe('incremental', () => {
         )
         expect(unwrap(v3)).toBe('ax')
 
-        const partsOf = (value: incremental.Value<string>) => {
+        const partsOf = (value: Value<string>) => {
           if (!value.content || value.content.type !== 'string') throw new Error('expected string')
           return value.content.parts.map((p) => [p.value, p.startMeta, p.endMeta])
         }
