@@ -1,5 +1,29 @@
 <!-- markdownlint-disable --><!-- textlint-disable -->
 
+## 6.0.0
+
+### Major Changes
+
+- move the incremental patcher to `mendoza/incremental` ([#114](https://github.com/sanity-io/mendoza-js/pull/114)) ([e062d84](https://github.com/sanity-io/mendoza-js/commit/e062d846fbdd6f549c2cf31215fe428ab86c585c))
+
+  `incremental` is no longer exported from `mendoza`. Import it from the new `mendoza/incremental` entry instead, which lets bundlers drop the functions you don't use:
+
+  ```ts
+  // Before
+  import {incremental} from 'mendoza'
+
+  // After
+  import * as incremental from 'mendoza/incremental'
+  // or
+  import {applyPatch, unwrap, wrap} from 'mendoza/incremental'
+  ```
+
+  TypeScript projects need `moduleResolution` set to `bundler`, `node16` or `nodenext` to resolve the new entry.
+
+### Patch Changes
+
+- reduce the bundle size of the patcher ([#113](https://github.com/sanity-io/mendoza-js/pull/113)) ([d61afc2](https://github.com/sanity-io/mendoza-js/commit/d61afc2718fdac2a2f38de10a8264ba1287b4825))
+
 ## 5.0.0
 
 ### Major Changes
